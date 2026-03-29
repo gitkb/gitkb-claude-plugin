@@ -1,0 +1,6 @@
+{
+  "gitkb": {
+    "command": "git-kb",
+    "args": ["mcp"]
+  }
+}
