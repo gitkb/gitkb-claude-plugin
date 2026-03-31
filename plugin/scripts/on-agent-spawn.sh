@@ -3,21 +3,15 @@
 # Synchronous — modifies the Agent tool's input before the subagent spawns.
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib.sh
+source "$SCRIPT_DIR/lib.sh"
+
 INPUT=$(cat)
-CWD=$(echo "$INPUT" | jq -r '.cwd // empty')
+CWD=$(resolve_cwd "$INPUT") || { echo '{}'; exit 0; }
 TOOL_INPUT=$(echo "$INPUT" | jq -r '.tool_input // empty')
 
-[ -z "$CWD" ] && echo '{}' && exit 0
 [ -z "$TOOL_INPUT" ] && echo '{}' && exit 0
-
-find_kb_root() {
-  local dir="$1"
-  while [ "$dir" != "/" ]; do
-    [ -d "$dir/.kb" ] && echo "$dir" && return 0
-    dir=$(dirname "$dir")
-  done
-  return 1
-}
 
 KB_ROOT=$(find_kb_root "$CWD") || { echo '{}'; exit 0; }
 

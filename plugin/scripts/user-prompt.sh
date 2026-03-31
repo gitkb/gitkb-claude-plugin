@@ -3,20 +3,12 @@
 # Lightweight: only fires when there's an active task to provide context for.
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib.sh
+source "$SCRIPT_DIR/lib.sh"
+
 INPUT=$(cat)
-CWD=$(echo "$INPUT" | jq -r '.cwd // empty')
-
-[ -z "$CWD" ] && exit 0
-
-# Find KB root
-find_kb_root() {
-  local dir="$1"
-  while [ "$dir" != "/" ]; do
-    [ -d "$dir/.kb" ] && echo "$dir" && return 0
-    dir=$(dirname "$dir")
-  done
-  return 1
-}
+CWD=$(resolve_cwd "$INPUT") || exit 0
 
 KB_ROOT=$(find_kb_root "$CWD") || exit 0
 

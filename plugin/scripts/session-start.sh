@@ -4,32 +4,13 @@
 # Returns: additionalContext with active task + board state + progress
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib.sh
+source "$SCRIPT_DIR/lib.sh"
+
 INPUT=$(cat)
 SOURCE=$(echo "$INPUT" | jq -r '.source // "startup"')
-CWD=$(echo "$INPUT" | jq -r '.cwd // empty')
-
-[ -z "$CWD" ] && exit 0
-
-# Find GITKB_ROOT — honor env var override, then walk up from CWD
-find_kb_root() {
-  # If GITKB_ROOT is explicitly set, trust it (empty = no KB)
-  if [ "${GITKB_ROOT+set}" = "set" ]; then
-    if [ -n "$GITKB_ROOT" ] && [ -d "$GITKB_ROOT/.kb" ]; then
-      echo "$GITKB_ROOT"
-      return 0
-    fi
-    return 1
-  fi
-  local dir="$1"
-  while [ "$dir" != "/" ]; do
-    if [ -d "$dir/.kb" ]; then
-      echo "$dir"
-      return 0
-    fi
-    dir=$(dirname "$dir")
-  done
-  return 1
-}
+CWD=$(resolve_cwd "$INPUT") || exit 0
 
 KB_ROOT=$(find_kb_root "$CWD") || exit 0  # No KB = no-op
 

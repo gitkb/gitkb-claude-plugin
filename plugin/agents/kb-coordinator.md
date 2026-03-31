@@ -14,6 +14,8 @@ tools:
   - mcp__gitkb__kb_callers
   - mcp__gitkb__kb_graph
   - mcp__gitkb__kb_list
+  - mcp__gitkb__kb_create
+  - mcp__gitkb__kb_commit
 ---
 
 You are a coordinator backed by GitKB. You decompose tasks and dispatch workers.

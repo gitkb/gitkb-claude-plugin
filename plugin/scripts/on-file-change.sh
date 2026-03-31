@@ -2,21 +2,16 @@
 # PostToolUse(Write|Edit) hook — track file changes against active task.
 # Runs async (background). When daemon is available, delegates to it
 # for acceptance criteria checking.
+# No CLI fallback — file change tracking requires daemon-side state
+# (acceptance criteria matching, change aggregation) that has no CLI equivalent.
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib.sh
+source "$SCRIPT_DIR/lib.sh"
+
 INPUT=$(cat)
-CWD=$(echo "$INPUT" | jq -r '.cwd // empty')
-
-[ -z "$CWD" ] && exit 0
-
-find_kb_root() {
-  local dir="$1"
-  while [ "$dir" != "/" ]; do
-    [ -d "$dir/.kb" ] && echo "$dir" && return 0
-    dir=$(dirname "$dir")
-  done
-  return 1
-}
+CWD=$(resolve_cwd "$INPUT") || exit 0
 
 KB_ROOT=$(find_kb_root "$CWD") || exit 0
 
