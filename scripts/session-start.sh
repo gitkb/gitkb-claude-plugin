@@ -8,8 +8,16 @@ INPUT=$(cat)
 SOURCE=$(echo "$INPUT" | jq -r '.source // "startup"')
 CWD=$(echo "$INPUT" | jq -r '.cwd')
 
-# Find GITKB_ROOT — walk up from CWD looking for .kb/
+# Find GITKB_ROOT — honor env var override, then walk up from CWD
 find_kb_root() {
+  # If GITKB_ROOT is explicitly set, trust it (empty = no KB)
+  if [ "${GITKB_ROOT+set}" = "set" ]; then
+    if [ -n "$GITKB_ROOT" ] && [ -d "$GITKB_ROOT/.kb" ]; then
+      echo "$GITKB_ROOT"
+      return 0
+    fi
+    return 1
+  fi
   local dir="$1"
   while [ "$dir" != "/" ]; do
     if [ -d "$dir/.kb" ]; then
