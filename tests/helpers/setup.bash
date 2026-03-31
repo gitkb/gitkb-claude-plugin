@@ -26,7 +26,7 @@ setup_test_kb() {
   GITKB_ROOT="$TEST_KB_ROOT" git kb set tasks/test-1 status=active 2>/dev/null
   GITKB_ROOT="$TEST_KB_ROOT" git kb commit -m "activate" tasks/test-1 2>/dev/null
 
-  export SCRIPTS_DIR="${BATS_TEST_DIRNAME}/../scripts"
+  export SCRIPTS_DIR="${BATS_TEST_DIRNAME}/../plugin/scripts"
 }
 
 teardown_test_kb() {
