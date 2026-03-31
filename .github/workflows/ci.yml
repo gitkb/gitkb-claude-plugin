@@ -38,8 +38,8 @@ jobs:
       - name: Verify git-kb
         run: git-kb --version
 
-      - name: Install bats-core
-        run: brew install bats-core
+      - name: Install bats-core and parallel
+        run: brew install bats-core parallel
 
       - name: Configure git
         run: |
