@@ -5,7 +5,9 @@
 set -euo pipefail
 
 INPUT=$(cat)
-CWD=$(echo "$INPUT" | jq -r '.cwd')
+CWD=$(echo "$INPUT" | jq -r '.cwd // empty')
+
+[ -z "$CWD" ] && exit 0
 
 find_kb_root() {
   local dir="$1"
@@ -18,23 +20,26 @@ find_kb_root() {
 
 KB_ROOT=$(find_kb_root "$CWD") || exit 0
 
-# Try daemon
+# Try daemon — fall through to CLI on failure
 SOCK="$KB_ROOT/.kb/.cache/gitkb.sock"
 if [ -S "$SOCK" ]; then
-  echo "$INPUT" | curl -sf --unix-socket "$SOCK" \
+  if echo "$INPUT" | curl -sf --unix-socket "$SOCK" \
     -X POST http://localhost/hooks/on-worktree \
     -H "Content-Type: application/json" \
-    --data @- 2>/dev/null || true
-  exit 0
+    --data @- 2>/dev/null; then
+    exit 0
+  fi
+  # Daemon failed — fall through to CLI
 fi
 
 # Fallback — try to match branch to task
-# WorktreeCreate input doesn't have a standard branch field in hookSpecificOutput,
-# but the worktree path often contains the branch name
 WORKTREE_PATH=$(echo "$INPUT" | jq -r '.hookSpecificOutput.worktreePath // empty' 2>/dev/null) || exit 0
 [ -z "$WORKTREE_PATH" ] && exit 0
 
-BRANCH=$(basename "$WORKTREE_PATH")
+# Read the actual branch checked out in the worktree, not the directory name
+BRANCH=$(git -C "$WORKTREE_PATH" branch --show-current 2>/dev/null) || BRANCH=""
+# Fall back to directory name if git command fails (worktree may not be ready yet)
+[ -z "$BRANCH" ] && BRANCH=$(basename "$WORKTREE_PATH")
 
 # Match pattern: harmony-NNN or tasks-harmony-NNN
 TASK_NUM=$(echo "$BRANCH" | grep -oE 'harmony-[0-9]+' | head -1) || exit 0
@@ -43,8 +48,8 @@ TASK_NUM=$(echo "$BRANCH" | grep -oE 'harmony-[0-9]+' | head -1) || exit 0
 TASK_SLUG="tasks/$TASK_NUM"
 
 # Check if task exists
-GITKB_ROOT="$KB_ROOT" git kb show "$TASK_SLUG" >/dev/null 2>&1 || exit 0
+GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb show "$TASK_SLUG" >/dev/null 2>&1 || exit 0
 
 # Set task active
-GITKB_ROOT="$KB_ROOT" git kb set "$TASK_SLUG" status=active 2>/dev/null || exit 0
-GITKB_ROOT="$KB_ROOT" git kb commit -m "Set active (worktree: $BRANCH)" "$TASK_SLUG" 2>/dev/null || true
+GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb set "$TASK_SLUG" status=active 2>/dev/null || exit 0
+GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb commit -m "Set active (worktree: $BRANCH)" "$TASK_SLUG" 2>/dev/null || true

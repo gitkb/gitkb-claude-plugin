@@ -4,7 +4,9 @@
 set -euo pipefail
 
 INPUT=$(cat)
-CWD=$(echo "$INPUT" | jq -r '.cwd')
+CWD=$(echo "$INPUT" | jq -r '.cwd // empty')
+
+[ -z "$CWD" ] && exit 0
 
 # Find KB root
 find_kb_root() {

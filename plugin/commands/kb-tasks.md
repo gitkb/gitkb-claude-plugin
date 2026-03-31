@@ -6,7 +6,7 @@ allowed-tools:
   - Bash(git kb:*)
 description: List tasks with filtering, relationships, and status details
 user-invocable: true
-argument-hint: "[active|draft|completed|blocked|all]"
+argument-hint: "[active|draft|completed|blocked|all|<search>]"
 ---
 
 List tasks from the knowledge base with rich detail.

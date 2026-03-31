@@ -7,7 +7,7 @@ allowed-tools:
   - Bash(git kb:*)
 description: Show GitKB kanban board with task status columns
 user-invocable: true
-argument-hint: "[group-by] [columns]"
+argument-hint: "[--group-by <field>] [--columns <list>] [--sort-by <field>]"
 ---
 
 Display the kanban board and provide actionable context about the current workstream.

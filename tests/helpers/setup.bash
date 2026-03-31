@@ -3,12 +3,14 @@
 
 # Create a temporary KB project for testing
 setup_test_kb() {
-  export TEST_DIR="$(mktemp -d)"
+  local tmpdir
+  tmpdir=$(mktemp -d)
+  export TEST_DIR="$tmpdir"
   export TEST_KB_ROOT="$TEST_DIR/project"
   mkdir -p "$TEST_KB_ROOT"
 
   # Initialize a minimal KB
-  cd "$TEST_KB_ROOT"
+  cd "$TEST_KB_ROOT" || return 1
   git init --quiet
   git commit --allow-empty -m "init" --quiet
 
@@ -70,8 +72,10 @@ assert_hook_output_valid() {
   local expected_event="$2"
 
   # Must be valid JSON
-  echo "$output" | jq empty 2>/dev/null
-  [ $? -eq 0 ] || { echo "Output is not valid JSON: $output"; return 1; }
+  if ! echo "$output" | jq empty 2>/dev/null; then
+    echo "Output is not valid JSON: $output"
+    return 1
+  fi
 
   # Must have hookSpecificOutput
   local event_name

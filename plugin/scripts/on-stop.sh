@@ -4,9 +4,10 @@
 set -euo pipefail
 
 INPUT=$(cat)
-CWD=$(echo "$INPUT" | jq -r '.cwd')
+CWD=$(echo "$INPUT" | jq -r '.cwd // empty')
 LAST_MSG=$(echo "$INPUT" | jq -r '.last_assistant_message // empty')
 
+[ -z "$CWD" ] && exit 0
 [ -z "$LAST_MSG" ] && exit 0
 
 find_kb_root() {
@@ -27,8 +28,7 @@ if [ -S "$SOCK" ]; then
     -X POST http://localhost/hooks/on-stop \
     -H "Content-Type: application/json" \
     --data @- 2>/dev/null || true
-  exit 0
 fi
 
-# No daemon — skip (CLI-based extraction would be too slow for async hook)
+# No daemon fallback — CLI-based extraction would be too slow for async hook
 exit 0

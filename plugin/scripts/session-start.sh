@@ -6,7 +6,9 @@ set -euo pipefail
 
 INPUT=$(cat)
 SOURCE=$(echo "$INPUT" | jq -r '.source // "startup"')
-CWD=$(echo "$INPUT" | jq -r '.cwd')
+CWD=$(echo "$INPUT" | jq -r '.cwd // empty')
+
+[ -z "$CWD" ] && exit 0
 
 # Find GITKB_ROOT — honor env var override, then walk up from CWD
 find_kb_root() {
@@ -44,32 +46,34 @@ if [ -S "$SOCK" ]; then
     echo "$RESPONSE"
     exit 0
   fi
+  # Daemon failed or returned bad response — fall through to CLI
 fi
 
 # Fallback — assemble context via CLI
+NL=$'\n'
 CONTEXT=""
 
 # Active tasks
-BOARD=$(GITKB_ROOT="$KB_ROOT" git kb board 2>/dev/null) || BOARD=""
+BOARD=$(GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb board 2>/dev/null) || BOARD=""
 if [ -n "$BOARD" ]; then
-  CONTEXT="## KB Board\n\`\`\`\n${BOARD}\n\`\`\`\n"
+  CONTEXT="## KB Board${NL}\`\`\`${NL}${BOARD}${NL}\`\`\`${NL}"
 fi
 
 # Find active task
-ACTIVE_TASK=$(GITKB_ROOT="$KB_ROOT" git kb list --type task --status active --json 2>/dev/null | jq -r '.[0].slug // empty' 2>/dev/null) || ACTIVE_TASK=""
+ACTIVE_TASK=$(GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb list --type task --status active --json 2>/dev/null | jq -r '.[0].slug // empty' 2>/dev/null) || ACTIVE_TASK=""
 
 if [ -n "$ACTIVE_TASK" ]; then
-  TASK_CONTENT=$(GITKB_ROOT="$KB_ROOT" git kb show "$ACTIVE_TASK" 2>/dev/null) || TASK_CONTENT=""
+  TASK_CONTENT=$(GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb show "$ACTIVE_TASK" 2>/dev/null) || TASK_CONTENT=""
   if [ -n "$TASK_CONTENT" ]; then
-    CONTEXT="${CONTEXT}\n## Active Task: ${ACTIVE_TASK}\n\n${TASK_CONTENT}\n"
+    CONTEXT="${CONTEXT}${NL}## Active Task: ${ACTIVE_TASK}${NL}${NL}${TASK_CONTENT}${NL}"
   fi
 fi
 
 # For compact source, keep it tighter — only task + board
 if [ "$SOURCE" = "compact" ] && [ -n "$CONTEXT" ]; then
-  CONTEXT="# GitKB Context (post-compaction)\n\n${CONTEXT}"
+  CONTEXT="# GitKB Context (post-compaction)${NL}${NL}${CONTEXT}"
 elif [ -n "$CONTEXT" ]; then
-  CONTEXT="# GitKB Context\n\n${CONTEXT}"
+  CONTEXT="# GitKB Context${NL}${NL}${CONTEXT}"
 fi
 
 if [ -z "$CONTEXT" ]; then

@@ -29,16 +29,16 @@ Run `/kb-decompose $ARGUMENTS` to break the task into subtasks with dependency r
 
 If the task is already decomposed (has child tasks visible via `kb_graph`), skip this step and use existing subtasks.
 
-### 2. Verify Readiness
+### 2. Build Dispatch Order
 
-Check `kb_board` to confirm:
-- All subtasks are created and linked
-- No circular dependencies
-- Independent subtasks are identifiable (no `blockedBy`)
+Use `kb_graph` and `kb_show` to build the dependency graph from `blockedBy` relationships:
+- For each subtask, inspect its `blockedBy` field via `kb_show`
+- Compute the set of immediately runnable tasks (those with no unresolved blockers)
+- Use `kb_board` only for status/progress tracking, not for dependency resolution
 
 ### 3. Dispatch Workers
 
-For each independent subtask (no unresolved `blockedBy`):
+For each runnable subtask (all `blockedBy` dependencies are completed):
 1. Spawn a `kb-worker` agent with `isolation: worktree`
 2. Pass the subtask slug in the agent prompt
 3. Run agents in parallel where possible

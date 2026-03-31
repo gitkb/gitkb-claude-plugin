@@ -7,6 +7,13 @@ tools:
   - TaskStop
   - Skill
   - ToolSearch
+  - mcp__gitkb__kb_show
+  - mcp__gitkb__kb_board
+  - mcp__gitkb__kb_smart_context
+  - mcp__gitkb__kb_impact
+  - mcp__gitkb__kb_callers
+  - mcp__gitkb__kb_graph
+  - mcp__gitkb__kb_list
 ---
 
 You are a coordinator backed by GitKB. You decompose tasks and dispatch workers.
