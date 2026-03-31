@@ -5,6 +5,8 @@ allowed-tools:
   - mcp__gitkb__kb_graph
   - Bash(git kb:*)
 description: Search the knowledge base and present results with suggested actions
+user-invocable: true
+argument-hint: "<query>"
 ---
 
 Search across all documents and present results with context and next steps.

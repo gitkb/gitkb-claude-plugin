@@ -12,6 +12,8 @@ allowed-tools:
   - Read
   - Edit
 description: Complete a task with verification — check acceptance criteria, require evidence, update status
+user-invocable: true
+argument-hint: "<task-slug>"
 ---
 
 Close a task after verifying all acceptance criteria are met. This enforces AGENTS.md rule #8: "Complete document body before status updates."

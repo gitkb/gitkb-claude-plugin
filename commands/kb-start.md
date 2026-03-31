@@ -11,6 +11,8 @@ allowed-tools:
   - mcp__gitkb__kb_impact
   - Bash(git kb:*)
 description: Start working on a task — load context, checkout, set active, and understand scope
+user-invocable: true
+argument-hint: "<task-slug-or-search>"
 ---
 
 Begin working on a task. This is the "start of work" ritual.

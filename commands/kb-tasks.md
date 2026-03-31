@@ -5,6 +5,8 @@ allowed-tools:
   - mcp__gitkb__kb_graph
   - Bash(git kb:*)
 description: List tasks with filtering, relationships, and status details
+user-invocable: true
+argument-hint: "[active|draft|completed|blocked|all]"
 ---
 
 List tasks from the knowledge base with rich detail.

@@ -11,6 +11,8 @@ allowed-tools:
   - mcp__gitkb__kb_impact
   - Bash(git kb:*)
 description: Create a new KB document by type with discovery, context-aware content, and auto-incrementing slug
+user-invocable: true
+argument-hint: "<type> [slug] <description>"
 ---
 
 Create a new GitKB document based on the user's input.

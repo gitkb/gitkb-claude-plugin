@@ -1,6 +1,7 @@
 ---
 name: before-refactor
 description: Safety check before refactoring - shows callers, callees, and impact analysis
+when_to_use: "Before renaming a function, changing a signature, modifying a type, or deleting a symbol. Use to assess blast radius and find all call sites that need updating."
 allowed-tools:
   - mcp__gitkb__kb_callers
   - mcp__gitkb__kb_callees

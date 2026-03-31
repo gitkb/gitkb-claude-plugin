@@ -11,6 +11,8 @@ allowed-tools:
   - Grep
   - Read
 description: Review a task against its acceptance criteria and current codebase state
+user-invocable: true
+argument-hint: "<task-slug>"
 ---
 
 Review a task to assess completeness. Check acceptance criteria against the actual codebase, identify what's done, what's remaining, and what's changed since the task was written.

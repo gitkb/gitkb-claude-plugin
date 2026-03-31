@@ -1,6 +1,7 @@
 ---
 name: understand
 description: Understand a file or symbol's structure and dependencies using code intelligence tools
+when_to_use: "When exploring unfamiliar code, trying to understand a function's callers and callees, or analyzing a file's symbol structure before making changes."
 allowed-tools:
   - mcp__gitkb__kb_symbols
   - mcp__gitkb__kb_callers

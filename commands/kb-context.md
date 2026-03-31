@@ -10,6 +10,8 @@ allowed-tools:
   - mcp__gitkb__kb_commit
   - Bash(git kb:*)
 description: Load and validate project context, bootstrapping if needed
+user-invocable: true
+argument-hint: "[task-slug]"
 ---
 
 Load project context following the AGENTS.md PATH A/B/C flow.

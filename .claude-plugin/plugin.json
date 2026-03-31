@@ -13,5 +13,11 @@
     "mcp",
     "task-management",
     "developer-tools"
-  ]
+  ],
+  "mcpServers": {
+    "gitkb": {
+      "command": "git-kb",
+      "args": ["mcp"]
+    }
+  }
 }

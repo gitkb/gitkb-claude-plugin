@@ -5,6 +5,8 @@ allowed-tools:
   - mcp__gitkb__kb_commit
   - mcp__gitkb__kb_show
 description: Commit workspace changes to the knowledge base with validation
+user-invocable: true
+argument-hint: "[message]"
 ---
 
 Review, validate, and commit pending workspace changes.

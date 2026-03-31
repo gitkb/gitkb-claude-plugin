@@ -3,6 +3,7 @@ allowed-tools:
   - mcp__gitkb__kb_status
   - mcp__gitkb__kb_diff
 description: Show workspace status and pending changes
+user-invocable: true
 ---
 
 Show the current workspace status including any uncommitted changes.

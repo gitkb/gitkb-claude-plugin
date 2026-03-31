@@ -6,6 +6,8 @@ allowed-tools:
   - mcp__gitkb__kb_graph
   - Bash(git kb:*)
 description: Show GitKB kanban board with task status columns
+user-invocable: true
+argument-hint: "[group-by] [columns]"
 ---
 
 Display the kanban board and provide actionable context about the current workstream.

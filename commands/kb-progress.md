@@ -9,6 +9,8 @@ allowed-tools:
   - Read
   - Edit
 description: Add a progress log entry to a task — quick datestamped note and commit
+user-invocable: true
+argument-hint: "[task-slug] <note>"
 ---
 
 Quickly log progress on a task. This is the most common mid-work operation — add a datestamped note without a full edit cycle.

@@ -1,6 +1,7 @@
 ---
 name: gitkb
 description: Manage GitKB knowledge base for project documentation, tasks, and context. Use when working with KB documents, viewing tasks, updating progress, or managing project knowledge.
+when_to_use: "When the user asks about tasks, project context, knowledge base documents, or wants to create/update/search KB content. Also when kb_ MCP tools need a reference guide."
 allowed-tools:
   - mcp__gitkb__*
   - Bash(git kb:*)

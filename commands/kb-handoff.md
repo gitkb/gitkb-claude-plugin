@@ -12,6 +12,8 @@ allowed-tools:
   - Read
   - Edit
 description: End-of-session handoff — update context, log progress, commit pending changes
+user-invocable: true
+argument-hint: "[summary]"
 ---
 
 Prepare for session end or agent handoff. Ensures all work-in-progress is captured and context documents are fresh for the next session.

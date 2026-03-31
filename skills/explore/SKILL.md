@@ -1,6 +1,7 @@
 ---
 name: explore
 description: Explore codebase semantically - find relevant code and documents using natural language search
+when_to_use: "When searching for code or documentation using natural language intent rather than exact names. Use for questions like 'where is authentication handled' or 'find rate limiting code'."
 allowed-tools:
   - mcp__gitkb__kb_semantic
   - mcp__gitkb__kb_search
