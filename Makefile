@@ -7,11 +7,11 @@ test-hooks:
 
 lint:
 	@echo "Checking hook scripts are executable..."
-	@for f in scripts/*.sh; do \
+	@for f in plugin/scripts/*.sh; do \
 		test -x "$$f" || (echo "FAIL: $$f not executable" && exit 1); \
 	done
 	@echo "Checking hooks.json is valid JSON..."
-	@jq empty hooks/hooks.json
+	@jq empty plugin/hooks/hooks.json
 	@echo "Checking plugin.json is valid JSON..."
-	@jq empty .claude-plugin/plugin.json
+	@jq empty plugin/.claude-plugin/plugin.json
 	@echo "All checks passed."

@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check hook scripts are executable
+        run: |
+          for f in plugin/scripts/*.sh; do
+            test -x "$f" || { echo "FAIL: $f not executable"; exit 1; }
+          done
+
+      - name: Validate JSON files
+        run: |
+          jq empty plugin/hooks/hooks.json
+          jq empty plugin/.claude-plugin/plugin.json
+
+  test:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install git-kb
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -fsSL https://get.gitkb.com/install.sh | bash
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Verify git-kb
+        run: git-kb --version
+
+      - name: Install bats-core
+        run: brew install bats-core
+
+      - name: Configure git
+        run: |
+          git config --global user.email "ci@gitkb.com"
+          git config --global user.name "CI"
+
+      - name: Run tests
+        run: make test
