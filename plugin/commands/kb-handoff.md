@@ -8,7 +8,7 @@ allowed-tools:
   - mcp__gitkb__kb_diff
   - mcp__gitkb__kb_commit
   - mcp__gitkb__kb_set
-  - Bash(git kb:*)
+  - Bash(git kb:*)  # CLI fallback: `git kb code symbols "name"` (positional arg, not --search). Never suppress stderr.
   - Read
   - Edit
 description: End-of-session handoff — update context, log progress, commit pending changes

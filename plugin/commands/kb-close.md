@@ -8,7 +8,7 @@ allowed-tools:
   - mcp__gitkb__kb_set
   - mcp__gitkb__kb_graph
   - mcp__gitkb__kb_list
-  - Bash(git kb:*)
+  - Bash(git kb:*)  # CLI fallback: `git kb code symbols "name"` (positional arg, not --search). Never suppress stderr.
   - Read
   - Edit
 description: Complete a task with verification — check acceptance criteria, require evidence, update status

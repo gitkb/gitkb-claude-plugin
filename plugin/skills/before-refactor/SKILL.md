@@ -32,6 +32,7 @@ Safety check before modifying a function, method, or type. Shows all call sites 
    ```
    kb_callers with symbol: "<full-symbol-id>"
    ```
+   If `kb_callers` returns multiple candidates (ambiguous name), pick the correct one using the fully qualified `file::kind::name` ID from the candidates list and re-run.
 
 3. **Get callees (what this function depends on):**
    ```

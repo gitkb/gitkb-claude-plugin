@@ -3,7 +3,7 @@ allowed-tools:
   - mcp__gitkb__kb_search
   - mcp__gitkb__kb_show
   - mcp__gitkb__kb_graph
-  - Bash(git kb:*)
+  - Bash(git kb:*)  # CLI fallback: `git kb code symbols "name"` (positional arg, not --search). Never suppress stderr.
 description: Search the knowledge base and present results with suggested actions
 user-invocable: true
 argument-hint: "<query>"

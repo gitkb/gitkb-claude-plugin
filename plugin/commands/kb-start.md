@@ -9,7 +9,7 @@ allowed-tools:
   - mcp__gitkb__kb_graph
   - mcp__gitkb__kb_symbols
   - mcp__gitkb__kb_impact
-  - Bash(git kb:*)
+  - Bash(git kb:*)  # CLI fallback: `git kb code symbols "name"` (positional arg, not --search). Never suppress stderr.
 description: Start working on a task — load context, checkout, set active, and understand scope
 user-invocable: true
 argument-hint: "<task-slug-or-search>"

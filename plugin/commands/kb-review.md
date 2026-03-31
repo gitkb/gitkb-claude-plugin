@@ -6,7 +6,7 @@ allowed-tools:
   - mcp__gitkb__kb_list
   - mcp__gitkb__kb_symbols
   - mcp__gitkb__kb_impact
-  - Bash(git kb:*)
+  - Bash(git kb:*)  # CLI fallback: `git kb code symbols "name"` (positional arg, not --search). Never suppress stderr.
   - Glob
   - Grep
   - Read

@@ -3,7 +3,7 @@ allowed-tools:
   - mcp__gitkb__kb_list
   - mcp__gitkb__kb_show
   - mcp__gitkb__kb_graph
-  - Bash(git kb:*)
+  - Bash(git kb:*)  # CLI fallback: `git kb code symbols "name"` (positional arg, not --search). Never suppress stderr.
 description: List tasks with filtering, relationships, and status details
 user-invocable: true
 argument-hint: "[active|draft|completed|blocked|all|<search>]"

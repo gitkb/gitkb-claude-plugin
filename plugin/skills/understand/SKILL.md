@@ -104,6 +104,15 @@ Provide a summary with:
 - tasks/my-task (Auth Service Refactoring)
 ```
 
+## Troubleshooting
+
+If `kb_symbols` or `kb_callers` return empty results:
+1. Verify the index exists: `kb_symbols with file_path: "<file>"` — if empty, the file isn't indexed
+2. Re-index: `git kb code index <directory_or_file>`
+3. Retry the original query
+
+If results look stale after editing files, the daemon's file watcher should auto-reindex (500ms debounce). If not running, manually re-index the changed files.
+
 ## Prerequisites
 
 Code must be indexed first:

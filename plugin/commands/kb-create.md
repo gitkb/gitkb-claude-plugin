@@ -9,7 +9,7 @@ allowed-tools:
   - mcp__gitkb__kb_commit
   - mcp__gitkb__kb_symbols
   - mcp__gitkb__kb_impact
-  - Bash(git kb:*)
+  - Bash(git kb:*)  # CLI fallback: `git kb code symbols "name"` (positional arg, not --search). Never suppress stderr.
 description: Create a new KB document by type with discovery, context-aware content, and auto-incrementing slug
 user-invocable: true
 argument-hint: "<type> [slug] <description>"

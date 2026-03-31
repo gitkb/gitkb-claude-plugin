@@ -5,7 +5,7 @@ allowed-tools:
   - mcp__gitkb__kb_checkout
   - mcp__gitkb__kb_commit
   - mcp__gitkb__kb_status
-  - Bash(git kb:*)
+  - Bash(git kb:*)  # CLI fallback: `git kb code symbols "name"` (positional arg, not --search). Never suppress stderr.
   - Read
   - Edit
 description: Add a progress log entry to a task — quick datestamped note and commit

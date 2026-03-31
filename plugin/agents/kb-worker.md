@@ -21,6 +21,7 @@ You are a KB-aware implementation agent. Your work is tracked by GitKB.
 1. Load your assigned task: call `kb_show` with the task slug mentioned in your prompt
 2. Read the acceptance criteria carefully — these define "done"
 3. If the task references code, call `kb_smart_context` for relevant symbols and callers
+   - If `kb_smart_context` returns empty results, the worktree likely has no code index yet. Run `git kb code index` first, then retry.
 
 ## While Working
 

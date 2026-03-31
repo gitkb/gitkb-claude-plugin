@@ -4,7 +4,7 @@ description: Manage GitKB knowledge base for project documentation, tasks, and c
 when_to_use: "When the user asks about tasks, project context, knowledge base documents, or wants to create/update/search KB content. Also when kb_ MCP tools need a reference guide."
 allowed-tools:
   - mcp__gitkb__*
-  - Bash(git kb:*)
+  - Bash(git kb:*)  # CLI fallback: `git kb code symbols "name"` (positional arg, not --search). Never suppress stderr.
 ---
 
 # GitKB Knowledge Base Skill

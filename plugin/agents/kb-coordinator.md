@@ -38,6 +38,7 @@ If the task has >5 acceptance criteria or spans multiple modules:
 - Spawn `kb-worker` agents for each independent subtask
 - Pass the task slug in the agent prompt so the worker can load it
 - Workers run in isolated worktrees — no conflicts between them
+- **Worktree code intel:** Workers in fresh worktrees have no code index. Include in the worker prompt: "Run `git kb code index` before using code intelligence tools."
 
 ### 4. Monitor
 

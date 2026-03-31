@@ -8,7 +8,7 @@ allowed-tools:
   - mcp__gitkb__kb_checkout
   - mcp__gitkb__kb_create
   - mcp__gitkb__kb_commit
-  - Bash(git kb:*)
+  - Bash(git kb:*)  # CLI fallback: `git kb code symbols "name"` (positional arg, not --search). Never suppress stderr.
 description: Load and validate project context, bootstrapping if needed
 user-invocable: true
 argument-hint: "[task-slug]"

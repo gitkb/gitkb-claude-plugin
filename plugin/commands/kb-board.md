@@ -4,7 +4,7 @@ allowed-tools:
   - mcp__gitkb__kb_show
   - mcp__gitkb__kb_board
   - mcp__gitkb__kb_graph
-  - Bash(git kb:*)
+  - Bash(git kb:*)  # CLI fallback: `git kb code symbols "name"` (positional arg, not --search). Never suppress stderr.
 description: Show GitKB kanban board with task status columns
 user-invocable: true
 argument-hint: "[--group-by <field>] [--columns <list>] [--sort-by <field>]"

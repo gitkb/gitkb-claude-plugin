@@ -10,7 +10,7 @@ allowed-tools:
   - mcp__gitkb__kb_create
   - mcp__gitkb__kb_commit
   - mcp__gitkb__kb_graph
-  - Bash(git kb:*)
+  - Bash(git kb:*)  # CLI fallback: `git kb code symbols "name"` (positional arg, not --search). Never suppress stderr.
 description: Decompose a task into subtasks using code intelligence — callers, impact analysis, and symbol structure
 user-invocable: true
 argument-hint: "<task-slug>"
@@ -38,6 +38,8 @@ Use `kb_smart_context` with the task slug to get code context with call graph tr
 For each referenced file, use `kb_impact` to assess blast radius:
 - How many files depend on it?
 - How many callers would be affected by changes?
+
+**Handling ambiguous symbols:** If `kb_callers` returns multiple candidates for a symbol name, use the fully qualified `file::kind::name` symbol ID from the candidates list (e.g. `src/auth.rs::fn::login` instead of just `login`).
 
 ### 3. Identify Natural Boundaries
 
