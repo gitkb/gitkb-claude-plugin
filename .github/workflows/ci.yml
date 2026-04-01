@@ -12,16 +12,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check hook scripts are executable
-        run: |
-          for f in plugin/scripts/*.sh; do
-            test -x "$f" || { echo "FAIL: $f not executable"; exit 1; }
-          done
-
-      - name: Validate JSON files
-        run: |
-          jq empty plugin/hooks/hooks.json
-          jq empty plugin/.claude-plugin/plugin.json
+      - name: Run lint
+        run: make lint
 
   test:
     runs-on: macos-latest
@@ -29,8 +21,6 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install git-kb
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           curl -fsSL https://get.gitkb.com/install.sh | bash
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
