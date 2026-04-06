@@ -17,29 +17,15 @@ KB_ROOT=$(find_kb_root "$CWD") || { echo '{}'; exit 0; }
 
 hook_enabled "$KB_ROOT" "context_injection" "true" || { echo '{}'; exit 0; }
 
-# Try daemon
-SOCK="$KB_ROOT/.kb/.cache/gitkb.sock"
-if [ -S "$SOCK" ]; then
-  RESPONSE=$(echo "$INPUT" | curl -sf --unix-socket "$SOCK" \
-    -X POST http://localhost/hooks/on-agent-spawn \
-    -H "Content-Type: application/json" \
-    --data @- 2>/dev/null) || RESPONSE=""
+# Resolve active task (resolve outputs plain slug text)
+TASK=$(GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb resolve --auto 2>/dev/null) || { echo '{}'; exit 0; }
+TASK=$(echo "$TASK" | tr -d '[:space:]')
+[ -z "$TASK" ] && { echo '{}'; exit 0; }
 
-  if [ -n "$RESPONSE" ] && echo "$RESPONSE" | jq -e '.hookSpecificOutput' >/dev/null 2>&1; then
-    echo "$RESPONSE"
-    exit 0
-  fi
-fi
+TASK_JSON=$(GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb show "$TASK" --json 2>/dev/null) || { echo '{}'; exit 0; }
+TASK_TITLE=$(echo "$TASK_JSON" | jq -r '.documents[0].title // empty')
 
-# Fallback — inject active task context into the agent's prompt
-ACTIVE_JSON=$(GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb list --type task --status active --json 2>/dev/null) || { echo '{}'; exit 0; }
-ACTIVE_TASK=$(echo "$ACTIVE_JSON" | jq -r '.[0].slug // empty' 2>/dev/null)
-[ -z "$ACTIVE_TASK" ] && echo '{}' && exit 0
-
-TASK_TITLE=$(echo "$ACTIVE_JSON" | jq -r '.[0].title // empty' 2>/dev/null)
-
-# Inject task context as additional context (doesn't modify the agent's prompt)
-CONTEXT="Active KB task: ${ACTIVE_TASK} — ${TASK_TITLE}. Use kb_show to load full task details before starting work."
+CONTEXT="Active KB task: ${TASK} — ${TASK_TITLE}. Use kb_show to load full task details before starting work."
 
 jq -n --arg ctx "$CONTEXT" '{
   hookSpecificOutput: {

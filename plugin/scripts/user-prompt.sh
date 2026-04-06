@@ -14,19 +14,18 @@ KB_ROOT=$(find_kb_root "$CWD") || exit 0
 
 hook_enabled "$KB_ROOT" "prompt_context" "false" || { echo '{}'; exit 0; }
 
-# Check daemon
-SOCK="$KB_ROOT/.kb/.cache/gitkb.sock"
-if [ -S "$SOCK" ]; then
-  RESPONSE=$(echo "$INPUT" | curl -sf --unix-socket "$SOCK" \
-    -X POST http://localhost/hooks/user-prompt \
-    -H "Content-Type: application/json" \
-    --data @- 2>/dev/null) || RESPONSE=""
+# Resolve active task (resolve outputs plain slug text)
+TASK=$(GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb resolve --auto 2>/dev/null) || { echo '{}'; exit 0; }
+TASK=$(echo "$TASK" | tr -d '[:space:]')
+[ -z "$TASK" ] && { echo '{}'; exit 0; }
 
-  if [ -n "$RESPONSE" ] && echo "$RESPONSE" | jq -e '.hookSpecificOutput' >/dev/null 2>&1; then
-    echo "$RESPONSE"
-    exit 0
-  fi
-fi
+TASK_CONTENT=$(GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb show "$TASK" 2>/dev/null) || TASK_CONTENT=""
 
-# No daemon — no-op (we don't want to run expensive CLI on every prompt)
-echo '{}'
+[ -z "$TASK_CONTENT" ] && { echo '{}'; exit 0; }
+
+jq -n --arg ctx "## Active Task: $TASK\n\n$TASK_CONTENT" '{
+  hookSpecificOutput: {
+    hookEventName: "UserPromptSubmit",
+    additionalContext: $ctx
+  }
+}'

@@ -16,6 +16,11 @@ setup_test_kb() {
 
   GITKB_ROOT="$TEST_KB_ROOT" git kb init --quiet 2>/dev/null || true
 
+  # Add repos config for commit linking tests
+  local repo_name
+  repo_name=$(basename "$TEST_KB_ROOT")
+  printf '\n[repos]\n%s = { path = "." }\n' "$repo_name" >> "$TEST_KB_ROOT/.kb/config.toml"
+
   # Create a test task
   GITKB_ROOT="$TEST_KB_ROOT" git kb create \
     --type task \

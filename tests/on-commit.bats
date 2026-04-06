@@ -17,10 +17,10 @@ teardown() {
 
   echo "$input" | "$SCRIPTS_DIR/on-commit.sh" 2>/dev/null
 
-  # Check the task was updated with commit reference
+  # Check the task was updated with commit reference via git kb link
   local task_content
   task_content=$(GITKB_ROOT="$TEST_KB_ROOT" git kb show tasks/test-1 2>/dev/null)
-  [[ "$task_content" == *"[[commit:abc1234]]"* ]]
+  [[ "$task_content" == *"[[commit:"*"abc1234]]"* ]]
 }
 
 @test "on-commit: no commit hash in output is a no-op" {
@@ -31,10 +31,10 @@ teardown() {
 
   echo "$input" | "$SCRIPTS_DIR/on-commit.sh" 2>/dev/null
 
-  # Task should not have progress log
+  # Task should not have commits section
   local task_content
   task_content=$(GITKB_ROOT="$TEST_KB_ROOT" git kb show tasks/test-1 2>/dev/null)
-  [[ "$task_content" != *"Progress Log"* ]]
+  [[ "$task_content" != *"Commits"* ]]
 }
 
 @test "on-commit: no active task is a no-op" {

@@ -14,47 +14,36 @@ CWD=$(resolve_cwd "$INPUT") || exit 0
 
 KB_ROOT=$(find_kb_root "$CWD") || exit 0  # No KB = no-op
 
-# Check config before any side effects (daemon start, context assembly)
+# Check config before any side effects
 hook_enabled "$KB_ROOT" "context_injection" "true" || { echo '{}'; exit 0; }
 
-# Ensure daemon is running, anchored to the resolved KB root
-( GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb daemon status --quiet || \
-  GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb daemon start ) >/dev/null 2>&1 || true
+# Resolve active task (resolve outputs plain slug text, not JSON)
+TASK=$(GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb resolve --auto 2>/dev/null) || TASK=""
+TASK=$(echo "$TASK" | tr -d '[:space:]')
 
-# Check if daemon is running
-SOCK="$KB_ROOT/.kb/.cache/gitkb.sock"
-if [ -S "$SOCK" ]; then
-  # Daemon available — use HTTP for richer context
-  RESPONSE=$(echo "$INPUT" | curl -sf --unix-socket "$SOCK" \
-    -X POST http://localhost/hooks/session-start \
-    -H "Content-Type: application/json" \
-    --data @- 2>/dev/null) || RESPONSE=""
-
-  if [ -n "$RESPONSE" ] && echo "$RESPONSE" | jq -e '.hookSpecificOutput' >/dev/null 2>&1; then
-    echo "$RESPONSE"
-    exit 0
+TASK_TITLE=""
+TASK_CONTENT=""
+if [ -n "$TASK" ]; then
+  TASK_JSON=$(GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb show "$TASK" --json 2>/dev/null) || TASK_JSON=""
+  if [ -n "$TASK_JSON" ]; then
+    TASK_TITLE=$(echo "$TASK_JSON" | jq -r '.documents[0].title // empty' 2>/dev/null) || TASK_TITLE=""
+    TASK_CONTENT=$(GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb show "$TASK" 2>/dev/null) || TASK_CONTENT=""
   fi
-  # Daemon failed or returned bad response — fall through to CLI
 fi
 
-# Fallback — assemble context via CLI
+# Assemble context markdown
 NL=$'\n'
 CONTEXT=""
 
-# Active tasks
+# Board
 BOARD=$(GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb board 2>/dev/null) || BOARD=""
 if [ -n "$BOARD" ]; then
   CONTEXT="## KB Board${NL}\`\`\`${NL}${BOARD}${NL}\`\`\`${NL}"
 fi
 
-# Find active task
-ACTIVE_TASK=$(GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb list --type task --status active --json 2>/dev/null | jq -r '.[0].slug // empty' 2>/dev/null) || ACTIVE_TASK=""
-
-if [ -n "$ACTIVE_TASK" ]; then
-  TASK_CONTENT=$(GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb show "$ACTIVE_TASK" 2>/dev/null) || TASK_CONTENT=""
-  if [ -n "$TASK_CONTENT" ]; then
-    CONTEXT="${CONTEXT}${NL}## Active Task: ${ACTIVE_TASK}${NL}${NL}${TASK_CONTENT}${NL}"
-  fi
+# Active task
+if [ -n "$TASK" ] && [ -n "$TASK_CONTENT" ]; then
+  CONTEXT="${CONTEXT}${NL}## Active Task: ${TASK}${NL}${NL}${TASK_CONTENT}${NL}"
 fi
 
 # For compact source, keep it tighter — only task + board
@@ -65,7 +54,6 @@ elif [ -n "$CONTEXT" ]; then
 fi
 
 if [ -z "$CONTEXT" ]; then
-  # No context to inject
   echo '{}'
   exit 0
 fi

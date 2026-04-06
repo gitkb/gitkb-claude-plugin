@@ -46,3 +46,25 @@ find_kb_root() {
   done
   return 1
 }
+
+# Detect which repo CWD is in by matching against git kb repo list.
+# Falls back to git remote name for single-repo KBs.
+# Usage: REPO=$(detect_repo "$KB_ROOT" "$CWD")
+detect_repo() {
+  local kb_root="$1" cwd="$2"
+  local rel_path="${cwd#"$kb_root"/}"
+  local repo_name
+  repo_name=$(GITKB_ROOT="$kb_root" git kb repo list --json 2>/dev/null | \
+    jq -r --arg rel "$rel_path" '.[] | select(.path != null) | select($rel | startswith(.path)) | .name' | head -1) || repo_name=""
+  if [ -n "$repo_name" ]; then
+    echo "$repo_name"
+    return
+  fi
+  local remote_url
+  remote_url=$(git -C "$cwd" remote get-url origin 2>/dev/null) || remote_url=""
+  if [ -n "$remote_url" ]; then
+    echo "$remote_url" | sed 's/.*\///' | sed 's/\.git$//'
+    return
+  fi
+  basename "$cwd"
+}
