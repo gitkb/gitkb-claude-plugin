@@ -20,8 +20,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install git-kb and test deps
-        run: brew install gitkb/tap/gitkb bats-core parallel
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install git-kb from source
+        run: |
+          git clone --depth 1 https://github.com/harmony-labs/gitkb-core.git /tmp/gitkb-core
+          cargo install --path /tmp/gitkb-core/crates/gitkb-cli --root ~/.local
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Install test deps
+        run: brew install bats-core parallel
 
       - name: Verify git-kb
         run: git-kb --version
