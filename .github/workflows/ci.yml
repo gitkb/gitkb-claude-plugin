@@ -24,6 +24,8 @@ jobs:
         run: |
           INSTALL_DIR="${RUNNER_TEMP}/gitkb-bin"
           mkdir -p "$INSTALL_DIR"
+          # Clear stale cargo git checkouts that may have local-only vendor/ dirs
+          rm -rf ~/.cargo/git/checkouts/gitkb-core-*
           cargo install --git https://github.com/harmony-labs/gitkb-core.git gitkb-cli --root "$INSTALL_DIR"
           echo "$INSTALL_DIR/bin" >> "$GITHUB_PATH"
 
