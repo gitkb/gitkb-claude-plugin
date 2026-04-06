@@ -14,6 +14,11 @@ CWD=$(resolve_cwd "$INPUT") || exit 0
 
 KB_ROOT=$(find_kb_root "$CWD") || exit 0  # No KB = no-op
 
+# Ensure daemon is running
+git kb daemon status --quiet 2>/dev/null || git kb daemon start 2>/dev/null || true
+
+hook_enabled "$KB_ROOT" "context_injection" "true" || exit 0
+
 # Check if daemon is running
 SOCK="$KB_ROOT/.kb/.cache/gitkb.sock"
 if [ -S "$SOCK" ]; then

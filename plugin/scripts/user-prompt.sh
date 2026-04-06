@@ -12,6 +12,8 @@ CWD=$(resolve_cwd "$INPUT") || exit 0
 
 KB_ROOT=$(find_kb_root "$CWD") || exit 0
 
+hook_enabled "$KB_ROOT" "prompt_context" "false" || { echo '{}'; exit 0; }
+
 # Check daemon
 SOCK="$KB_ROOT/.kb/.cache/gitkb.sock"
 if [ -S "$SOCK" ]; then
