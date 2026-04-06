@@ -22,10 +22,12 @@ jobs:
 
       - name: Install git-kb from source
         run: |
+          INSTALL_DIR="${RUNNER_TEMP}/gitkb-bin"
+          mkdir -p "$INSTALL_DIR"
           git clone --depth 1 https://github.com/harmony-labs/gitkb-core.git /tmp/gitkb-core-$$
-          cargo install --path /tmp/gitkb-core-$$/crates/gitkb-cli --root ~/.local
+          cargo install --path /tmp/gitkb-core-$$/crates/gitkb-cli --root "$INSTALL_DIR"
           rm -rf /tmp/gitkb-core-$$
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          echo "$INSTALL_DIR/bin" >> "$GITHUB_PATH"
 
       - name: Verify git-kb
         run: git-kb --version
