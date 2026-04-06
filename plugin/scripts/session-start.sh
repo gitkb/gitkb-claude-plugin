@@ -43,7 +43,9 @@ fi
 
 # Active task
 if [ -n "$TASK" ] && [ -n "$TASK_CONTENT" ]; then
-  CONTEXT="${CONTEXT}${NL}## Active Task: ${TASK}${NL}${NL}${TASK_CONTENT}${NL}"
+  TASK_LABEL="${TASK}"
+  [ -n "$TASK_TITLE" ] && TASK_LABEL="${TASK} — ${TASK_TITLE}"
+  CONTEXT="${CONTEXT}${NL}## Active Task: ${TASK_LABEL}${NL}${NL}${TASK_CONTENT}${NL}"
 fi
 
 # For compact source, keep it tighter — only task + board
