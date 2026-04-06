@@ -16,6 +16,8 @@ TOOL_RESPONSE=$(echo "$INPUT" | jq -r '.tool_response // empty')
 
 KB_ROOT=$(find_kb_root "$CWD") || exit 0
 
+hook_enabled "$KB_ROOT" "auto_commit_link" "true" || exit 0
+
 # Try daemon — fall through to CLI on failure
 SOCK="$KB_ROOT/.kb/.cache/gitkb.sock"
 if [ -S "$SOCK" ]; then

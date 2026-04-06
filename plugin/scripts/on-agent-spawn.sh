@@ -15,6 +15,8 @@ TOOL_INPUT=$(echo "$INPUT" | jq -r '.tool_input // empty')
 
 KB_ROOT=$(find_kb_root "$CWD") || { echo '{}'; exit 0; }
 
+hook_enabled "$KB_ROOT" "context_injection" "true" || { echo '{}'; exit 0; }
+
 # Try daemon
 SOCK="$KB_ROOT/.kb/.cache/gitkb.sock"
 if [ -S "$SOCK" ]; then

@@ -73,6 +73,35 @@ After installing, try asking Claude:
 - "Show me the kanban board"
 - "What's the impact of modifying `UserService`?"
 
+### 7 Lifecycle Hooks
+
+Hooks fire automatically during Claude Code sessions:
+
+| Hook | What it does | Config key | Default |
+|------|-------------|------------|---------|
+| SessionStart | Inject active task context, start daemon | `context_injection` | on |
+| PreToolUse(Agent) | Inject task context into subagent prompts | `context_injection` | on |
+| PostToolUse(Bash) | Auto-link git commits to active task | `auto_commit_link` | on |
+| WorktreeCreate | Bind new worktrees to matching KB tasks | `auto_worktree_bind` | on |
+| Stop | Append progress entry to active task | `auto_progress` | off |
+| UserPromptSubmit | Inject relevant KB docs per prompt | `prompt_context` | off |
+| PostToolUse(Write/Edit) | Track file changes | — | always |
+
+### Configuration
+
+Toggle hook features in `.kb/config.toml`:
+
+```toml
+[hooks]
+context_injection = true    # SessionStart + agent spawn context
+auto_commit_link = true     # Auto-link commits to active task
+auto_worktree_bind = true   # Match worktree branches to tasks
+auto_progress = false       # Append progress entries on Stop
+prompt_context = false       # Per-prompt KB context injection
+```
+
+All keys are optional — defaults apply when missing. Changes take effect on the next hook invocation (no restart needed).
+
 ## Documentation
 
 - [Getting Started](https://gitkb.com/docs/getting-started/quick-start/)

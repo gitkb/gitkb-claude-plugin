@@ -20,16 +20,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install git-kb
-        run: |
-          curl -fsSL https://get.gitkb.com/install.sh | bash
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Install git-kb and test deps
+        run: brew install harmony-labs/tap/gitkb bats-core parallel
 
       - name: Verify git-kb
         run: git-kb --version
-
-      - name: Install bats-core and parallel
-        run: brew install bats-core parallel
 
       - name: Configure git
         run: |

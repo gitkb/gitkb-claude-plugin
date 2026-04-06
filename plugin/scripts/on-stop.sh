@@ -17,6 +17,8 @@ LAST_MSG=$(echo "$INPUT" | jq -r '.last_assistant_message // empty')
 
 KB_ROOT=$(find_kb_root "$CWD") || exit 0
 
+hook_enabled "$KB_ROOT" "auto_progress" "false" || exit 0
+
 # Try daemon — stale sockets fail silently (acceptable for async hook;
 # the daemon auto-cleans its socket on clean shutdown)
 SOCK="$KB_ROOT/.kb/.cache/gitkb.sock"
