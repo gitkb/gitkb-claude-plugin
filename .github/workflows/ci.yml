@@ -16,37 +16,16 @@ jobs:
         run: make lint
 
   test:
-    runs-on: macos-latest
+    runs-on: [self-hosted, macOS, ARM64]
     steps:
       - uses: actions/checkout@v4
 
-      - name: Resolve gitkb-core HEAD
-        id: gitkb-rev
-        run: echo "sha=$(git ls-remote https://github.com/harmony-labs/gitkb-core.git HEAD | cut -f1)" >> "$GITHUB_OUTPUT"
-
-      - name: Cache git-kb binary
-        id: cache-gitkb
-        uses: actions/cache@v4
-        with:
-          path: ~/.local/bin/git-kb
-          key: gitkb-macos-${{ steps.gitkb-rev.outputs.sha }}
-
-      - name: Install Rust toolchain
-        if: steps.cache-gitkb.outputs.cache-hit != 'true'
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Build git-kb from source
-        if: steps.cache-gitkb.outputs.cache-hit != 'true'
+      - name: Install git-kb from source
         run: |
-          git clone --depth 1 https://github.com/harmony-labs/gitkb-core.git /tmp/gitkb-core
-          cargo install --path /tmp/gitkb-core/crates/gitkb-cli --root ~/.local
-          rm -rf /tmp/gitkb-core
-
-      - name: Add git-kb to PATH
-        run: echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-
-      - name: Install test deps
-        run: brew install bats-core parallel
+          git clone --depth 1 https://github.com/harmony-labs/gitkb-core.git /tmp/gitkb-core-$$
+          cargo install --path /tmp/gitkb-core-$$/crates/gitkb-cli --root ~/.local
+          rm -rf /tmp/gitkb-core-$$
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Verify git-kb
         run: git-kb --version
