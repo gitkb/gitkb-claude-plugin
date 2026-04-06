@@ -14,8 +14,8 @@ CWD=$(resolve_cwd "$INPUT") || exit 0
 
 KB_ROOT=$(find_kb_root "$CWD") || exit 0  # No KB = no-op
 
-# Ensure daemon is running (redirect stdout to prevent corrupting JSON response)
-git kb daemon status --quiet 2>/dev/null || git kb daemon start >/dev/null 2>&1 || true
+# Ensure daemon is running (best-effort, all output fully suppressed)
+( git kb daemon status --quiet || git kb daemon start ) >/dev/null 2>&1 || true
 
 hook_enabled "$KB_ROOT" "context_injection" "true" || { echo '{}'; exit 0; }
 
