@@ -14,10 +14,12 @@ CWD=$(resolve_cwd "$INPUT") || exit 0
 
 KB_ROOT=$(find_kb_root "$CWD") || exit 0  # No KB = no-op
 
-# Ensure daemon is running (best-effort, all output fully suppressed)
-( git kb daemon status --quiet || git kb daemon start ) >/dev/null 2>&1 || true
-
+# Check config before any side effects (daemon start, context assembly)
 hook_enabled "$KB_ROOT" "context_injection" "true" || { echo '{}'; exit 0; }
+
+# Ensure daemon is running, anchored to the resolved KB root
+( GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb daemon status --quiet || \
+  GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb daemon start ) >/dev/null 2>&1 || true
 
 # Check if daemon is running
 SOCK="$KB_ROOT/.kb/.cache/gitkb.sock"
