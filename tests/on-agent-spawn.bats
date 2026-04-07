@@ -42,8 +42,8 @@ teardown() {
 }
 
 @test "on-agent-spawn: no active task returns empty JSON" {
-  GITKB_ROOT="$TEST_KB_ROOT" git kb set tasks/test-1 status=completed 2>/dev/null
-  GITKB_ROOT="$TEST_KB_ROOT" git kb commit -m "complete" tasks/test-1 2>/dev/null
+  GITKB_ROOT="$TEST_KB_ROOT" git-kb set tasks/test-1 status=completed 2>/dev/null
+  GITKB_ROOT="$TEST_KB_ROOT" git-kb commit -m "complete" tasks/test-1 2>/dev/null
 
   local input
   input=$(build_hook_input "PreToolUse" "$TEST_KB_ROOT" "tool_name=Agent")
@@ -67,7 +67,7 @@ teardown() {
 
   # Verify: resolve with matching agent_id should find the task
   local resolved
-  resolved=$(AGENT_ID=agent-456 GITKB_ROOT="$TEST_KB_ROOT" git kb resolve --auto 2>/dev/null)
+  resolved=$(AGENT_ID=agent-456 GITKB_ROOT="$TEST_KB_ROOT" git-kb resolve --auto 2>/dev/null)
   [ "$resolved" = "tasks/test-1" ]
 }
 
@@ -82,6 +82,6 @@ teardown() {
 
   # Verify: resolve with matching session_id should find the task
   local resolved
-  resolved=$(CLAUDE_SESSION_ID=sess-789 GITKB_ROOT="$TEST_KB_ROOT" git kb resolve --auto 2>/dev/null)
+  resolved=$(CLAUDE_SESSION_ID=sess-789 GITKB_ROOT="$TEST_KB_ROOT" git-kb resolve --auto 2>/dev/null)
   [ "$resolved" = "tasks/test-1" ]
 }

@@ -18,16 +18,16 @@ KB_ROOT=$(find_kb_root "$CWD") || exit 0  # No KB = no-op
 hook_enabled "$KB_ROOT" "context_injection" "true" || { echo '{}'; exit 0; }
 
 # Resolve active task
-RESOLVE_JSON=$(GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb resolve --auto --fallback-recent --json 2>/dev/null) || RESOLVE_JSON='{}'
+RESOLVE_JSON=$(GITKB_ROOT="$KB_ROOT" git-kb resolve --auto --fallback-recent --json 2>/dev/null) || RESOLVE_JSON='{}'
 TASK=$(echo "$RESOLVE_JSON" | jq -r '.slug // empty' 2>/dev/null) || TASK=""
 
 TASK_TITLE=""
 TASK_CONTENT=""
 if [ -n "$TASK" ]; then
-  TASK_JSON=$(GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb show "$TASK" --json 2>/dev/null) || TASK_JSON=""
+  TASK_JSON=$(GITKB_ROOT="$KB_ROOT" git-kb show "$TASK" --json 2>/dev/null) || TASK_JSON=""
   if [ -n "$TASK_JSON" ]; then
     TASK_TITLE=$(echo "$TASK_JSON" | jq -r '.documents[0].title // empty' 2>/dev/null) || TASK_TITLE=""
-    TASK_CONTENT=$(GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb show "$TASK" 2>/dev/null) || TASK_CONTENT=""
+    TASK_CONTENT=$(GITKB_ROOT="$KB_ROOT" git-kb show "$TASK" 2>/dev/null) || TASK_CONTENT=""
   fi
 fi
 
@@ -36,7 +36,7 @@ NL=$'\n'
 CONTEXT=""
 
 # Board
-BOARD=$(GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb board 2>/dev/null) || BOARD=""
+BOARD=$(GITKB_ROOT="$KB_ROOT" git-kb board 2>/dev/null) || BOARD=""
 if [ -n "$BOARD" ]; then
   CONTEXT="## KB Board${NL}\`\`\`${NL}${BOARD}${NL}\`\`\`${NL}"
 fi

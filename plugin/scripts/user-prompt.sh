@@ -15,11 +15,11 @@ KB_ROOT=$(find_kb_root "$CWD") || exit 0
 hook_enabled "$KB_ROOT" "prompt_context" "false" || { echo '{}'; exit 0; }
 
 # Resolve active task
-RESOLVE_JSON=$(GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb resolve --auto --fallback-recent --json 2>/dev/null) || RESOLVE_JSON='{}'
+RESOLVE_JSON=$(GITKB_ROOT="$KB_ROOT" git-kb resolve --auto --fallback-recent --json 2>/dev/null) || RESOLVE_JSON='{}'
 TASK=$(echo "$RESOLVE_JSON" | jq -r '.slug // empty' 2>/dev/null) || TASK=""
 [ -z "$TASK" ] && { echo '{}'; exit 0; }
 
-TASK_CONTENT=$(GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb show "$TASK" 2>/dev/null) || TASK_CONTENT=""
+TASK_CONTENT=$(GITKB_ROOT="$KB_ROOT" git-kb show "$TASK" 2>/dev/null) || TASK_CONTENT=""
 
 [ -z "$TASK_CONTENT" ] && { echo '{}'; exit 0; }
 

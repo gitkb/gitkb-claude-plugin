@@ -14,7 +14,7 @@ setup_test_kb() {
   git init --quiet
   git commit --allow-empty -m "init" --quiet
 
-  GITKB_ROOT="$TEST_KB_ROOT" git kb init --quiet 2>/dev/null || true
+  GITKB_ROOT="$TEST_KB_ROOT" git-kb init --quiet 2>/dev/null || true
 
   # Add repos config for commit linking tests
   local repo_name
@@ -22,16 +22,16 @@ setup_test_kb() {
   printf '\n[repos]\n%s = { path = "." }\n' "$repo_name" >> "$TEST_KB_ROOT/.kb/config.toml"
 
   # Create a test task
-  GITKB_ROOT="$TEST_KB_ROOT" git kb create \
+  GITKB_ROOT="$TEST_KB_ROOT" git-kb create \
     --type task \
     --slug tasks/test-1 \
     --title "Test Task" 2>/dev/null
 
-  GITKB_ROOT="$TEST_KB_ROOT" git kb commit -m "test task" tasks/test-1 2>/dev/null
+  GITKB_ROOT="$TEST_KB_ROOT" git-kb commit -m "test task" tasks/test-1 2>/dev/null
 
   # Set it active
-  GITKB_ROOT="$TEST_KB_ROOT" git kb set tasks/test-1 status=active 2>/dev/null
-  GITKB_ROOT="$TEST_KB_ROOT" git kb commit -m "activate" tasks/test-1 2>/dev/null
+  GITKB_ROOT="$TEST_KB_ROOT" git-kb set tasks/test-1 status=active 2>/dev/null
+  GITKB_ROOT="$TEST_KB_ROOT" git-kb commit -m "activate" tasks/test-1 2>/dev/null
 
   export SCRIPTS_DIR="${BATS_TEST_DIRNAME}/../plugin/scripts"
 }
