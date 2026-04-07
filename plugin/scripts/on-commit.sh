@@ -23,7 +23,7 @@ SHA=$(echo "$TOOL_RESPONSE" | grep -oE '\b[0-9a-f]{7,40}\b' | head -1) || exit 0
 [ -z "$SHA" ] && exit 0
 
 # Resolve active task
-RESOLVE_JSON=$(GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb resolve --auto --json 2>/dev/null) || exit 0
+RESOLVE_JSON=$(GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb resolve --auto --fallback-recent --json 2>/dev/null) || exit 0
 TASK=$(echo "$RESOLVE_JSON" | jq -r '.slug // empty' 2>/dev/null) || exit 0
 [ -z "$TASK" ] && exit 0
 

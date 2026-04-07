@@ -28,6 +28,6 @@ TASK=$(echo "$RESOLVE_JSON" | jq -r '.slug // empty' 2>/dev/null) || exit 0
 [ -z "$TASK" ] && exit 0
 
 # Set task active and stamp worktree for multi-agent coordination
-GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb set "$TASK" status=active 2>/dev/null || exit 0
-GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb set "$TASK" worktree="$BRANCH" 2>/dev/null || true
-GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb commit -m "Set active (worktree: $BRANCH)" "$TASK" 2>/dev/null || true
+GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb set "$TASK" status=active >/dev/null 2>&1 || exit 0
+GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb set "$TASK" worktree="$BRANCH" >/dev/null 2>&1 || true
+GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb commit -m "Set active (worktree: $BRANCH)" "$TASK" >/dev/null 2>&1 || true

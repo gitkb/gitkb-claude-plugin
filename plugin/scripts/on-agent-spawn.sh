@@ -18,7 +18,7 @@ KB_ROOT=$(find_kb_root "$CWD") || { echo '{}'; exit 0; }
 hook_enabled "$KB_ROOT" "context_injection" "true" || { echo '{}'; exit 0; }
 
 # Resolve active task
-RESOLVE_JSON=$(GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb resolve --auto --json 2>/dev/null) || RESOLVE_JSON='{}'
+RESOLVE_JSON=$(GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb resolve --auto --fallback-recent --json 2>/dev/null) || RESOLVE_JSON='{}'
 TASK=$(echo "$RESOLVE_JSON" | jq -r '.slug // empty' 2>/dev/null) || TASK=""
 [ -z "$TASK" ] && { echo '{}'; exit 0; }
 
@@ -28,8 +28,8 @@ AGENT_ID_VAL=$(echo "$INPUT" | jq -r '.agent_id // empty')
 BIND_ID="${AGENT_ID_VAL:-$SESSION_ID}"
 
 if [ -n "$BIND_ID" ]; then
-  GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb set "$TASK" agent_id="$BIND_ID" 2>/dev/null || true
-  GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb commit -m "Bind agent $BIND_ID" "$TASK" 2>/dev/null || true
+  GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb set "$TASK" agent_id="$BIND_ID" >/dev/null 2>&1 || true
+  GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb commit -m "Bind agent $BIND_ID" "$TASK" >/dev/null 2>&1 || true
 fi
 
 TASK_JSON=$(GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb show "$TASK" --json 2>/dev/null) || { echo '{}'; exit 0; }
