@@ -56,13 +56,13 @@ teardown() {
   before=$(AGENT_ID=test-agent GITKB_ROOT="$TEST_KB_ROOT" git-kb resolve --auto 2>/dev/null) || before=""
   [ "$before" = "tasks/test-1" ]
 
-  # Pass session_id=test-agent so on-stop can verify ownership
   local input
   input=$(build_hook_input "Stop" "$TEST_KB_ROOT" \
     "last_assistant_message=Session complete" \
     "session_id=test-agent")
 
-  echo "$input" | "$SCRIPTS_DIR/on-stop.sh" >/dev/null 2>&1
+  # Set AGENT_ID env so resolve finds the binding via agent_id source
+  echo "$input" | AGENT_ID=test-agent "$SCRIPTS_DIR/on-stop.sh" >/dev/null 2>&1
 
   # Binding should be cleared — resolve should return empty
   local after

@@ -41,17 +41,11 @@ fi
 
 GITKB_ROOT="$KB_ROOT" git-kb commit -m "Progress breadcrumb" "$TASK" 2>/dev/null || true
 
-# Clear agent bindings on session end — only if this session owns them
-SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty' 2>/dev/null) || SESSION_ID=""
-AGENT_ID_VAL=$(echo "$INPUT" | jq -r '.agent_id // empty' 2>/dev/null) || AGENT_ID_VAL=""
-MY_ID="${AGENT_ID_VAL:-$SESSION_ID}"
-
-if [ -n "$TASK" ] && [ -n "$MY_ID" ]; then
-  # Read the current binding from the workspace file to check ownership
-  WORKSPACE_BINDING=$(grep "^agent_id:" "$WORKSPACE_FILE" 2>/dev/null | sed 's/agent_id: *//' | tr -d '[:space:]') || WORKSPACE_BINDING=""
-  if [ "$WORKSPACE_BINDING" = "$MY_ID" ]; then
-    GITKB_ROOT="$KB_ROOT" git-kb set "$TASK" agent_id= >/dev/null 2>&1 || true
-    GITKB_ROOT="$KB_ROOT" git-kb set "$TASK" worktree= >/dev/null 2>&1 || true
-    GITKB_ROOT="$KB_ROOT" git-kb commit -m "Unbind agent $MY_ID" "$TASK" >/dev/null 2>&1 || true
-  fi
+# Clear agent bindings on session end — only if this session owns them.
+# Check ownership via resolve: if source is "agent_id", our session's binding matched.
+RESOLVE_SOURCE=$(echo "$RESOLVE_JSON" | jq -r '.source // empty' 2>/dev/null) || RESOLVE_SOURCE=""
+if [ "$RESOLVE_SOURCE" = "agent_id" ]; then
+  GITKB_ROOT="$KB_ROOT" git-kb set "$TASK" agent_id= >/dev/null 2>&1 || true
+  GITKB_ROOT="$KB_ROOT" git-kb set "$TASK" worktree= >/dev/null 2>&1 || true
+  GITKB_ROOT="$KB_ROOT" git-kb commit -m "Unbind agent" "$TASK" >/dev/null 2>&1 || true
 fi
