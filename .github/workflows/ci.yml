@@ -19,12 +19,12 @@ jobs:
     # Self-hosted for sccache; fork PRs blocked for security
     if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: [self-hosted, macOS, ARM64]
-    env:
-      CARGO_HOME: ${{ runner.temp }}/cargo-home
     steps:
       - uses: actions/checkout@v4
 
       - name: Install git-kb from source
+        env:
+          CARGO_HOME: ${{ runner.temp }}/cargo-home
         run: |
           INSTALL_DIR="${RUNNER_TEMP}/gitkb-bin"
           SRC="${RUNNER_TEMP}/gitkb-src"

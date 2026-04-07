@@ -35,10 +35,10 @@ fi
 NL=$'\n'
 CONTEXT=""
 
-# Board
-BOARD=$(GITKB_ROOT="$KB_ROOT" git-kb board 2>/dev/null) || BOARD=""
+# Board summary (bounded output — full board can dominate context on busy KBs)
+BOARD=$(GITKB_ROOT="$KB_ROOT" git-kb board --summary 2>/dev/null) || BOARD=""
 if [ -n "$BOARD" ]; then
-  CONTEXT="## KB Board${NL}\`\`\`${NL}${BOARD}${NL}\`\`\`${NL}"
+  CONTEXT="## KB Board${NL}${BOARD}${NL}"
 fi
 
 # Active task

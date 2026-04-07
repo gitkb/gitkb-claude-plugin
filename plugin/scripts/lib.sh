@@ -55,7 +55,7 @@ detect_repo() {
   local rel_path="${cwd#"$kb_root"/}"
   local repo_name
   repo_name=$(GITKB_ROOT="$kb_root" git-kb repo list --json 2>/dev/null | \
-    jq -r --arg rel "$rel_path" '.[] | select(.path != null and .path != ".") | select($rel | startswith(.path)) | .name' | head -1) || repo_name=""
+    jq -r --arg rel "$rel_path" '.[] | select(.path != null and .path != ".") | select(($rel == .path) or ($rel | startswith(.path + "/"))) | .name' | head -1) || repo_name=""
   if [ -n "$repo_name" ]; then
     echo "$repo_name"
     return

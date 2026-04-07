@@ -48,22 +48,24 @@ teardown() {
   sed -i 's/auto_progress = false/auto_progress = true/' "$TEST_KB_ROOT/.kb/config.toml"
 
   # Stamp agent_id
-  GITKB_ROOT="$TEST_KB_ROOT" git -C "$TEST_KB_ROOT" kb set tasks/test-1 agent_id=test-agent
-  GITKB_ROOT="$TEST_KB_ROOT" git -C "$TEST_KB_ROOT" kb commit -m "bind" tasks/test-1
+  GITKB_ROOT="$TEST_KB_ROOT" git-kb set tasks/test-1 agent_id=test-agent
+  GITKB_ROOT="$TEST_KB_ROOT" git-kb commit -m "bind" tasks/test-1
 
   # Verify binding exists via resolve
   local before
-  before=$(AGENT_ID=test-agent GITKB_ROOT="$TEST_KB_ROOT" git -C "$TEST_KB_ROOT" kb resolve --auto 2>/dev/null) || before=""
+  before=$(AGENT_ID=test-agent GITKB_ROOT="$TEST_KB_ROOT" git-kb resolve --auto 2>/dev/null) || before=""
   [ "$before" = "tasks/test-1" ]
 
+  # Pass session_id=test-agent so on-stop can verify ownership
   local input
   input=$(build_hook_input "Stop" "$TEST_KB_ROOT" \
-    "last_assistant_message=Session complete")
+    "last_assistant_message=Session complete" \
+    "session_id=test-agent")
 
   echo "$input" | "$SCRIPTS_DIR/on-stop.sh" >/dev/null 2>&1
 
   # Binding should be cleared — resolve should return empty
   local after
-  after=$(AGENT_ID=test-agent GITKB_ROOT="$TEST_KB_ROOT" git -C "$TEST_KB_ROOT" kb resolve --auto 2>/dev/null) || after=""
+  after=$(AGENT_ID=test-agent GITKB_ROOT="$TEST_KB_ROOT" git-kb resolve --auto 2>/dev/null) || after=""
   [ -z "$after" ]
 }
