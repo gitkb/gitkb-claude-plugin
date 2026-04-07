@@ -22,11 +22,12 @@ WORKTREE_PATH=$(echo "$INPUT" | jq -r '.hookSpecificOutput.worktreePath // empty
 # Read the actual branch checked out in the worktree, not the directory name
 BRANCH=$(git -C "$WORKTREE_PATH" branch --show-current 2>/dev/null) || BRANCH=$(basename "$WORKTREE_PATH")
 
-# Resolve branch to task slug (resolve outputs plain slug text)
-TASK=$(GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb resolve --branch "$BRANCH" 2>/dev/null) || exit 0
-TASK=$(echo "$TASK" | tr -d '[:space:]')
+# Resolve branch to task slug
+RESOLVE_JSON=$(GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb resolve --branch "$BRANCH" --json 2>/dev/null) || exit 0
+TASK=$(echo "$RESOLVE_JSON" | jq -r '.slug // empty' 2>/dev/null) || exit 0
 [ -z "$TASK" ] && exit 0
 
-# Set task active and commit
+# Set task active and stamp worktree for multi-agent coordination
 GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb set "$TASK" status=active 2>/dev/null || exit 0
+GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb set "$TASK" worktree="$BRANCH" 2>/dev/null || true
 GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb commit -m "Set active (worktree: $BRANCH)" "$TASK" 2>/dev/null || true

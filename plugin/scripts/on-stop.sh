@@ -17,9 +17,9 @@ KB_ROOT=$(find_kb_root "$CWD") || exit 0
 
 hook_enabled "$KB_ROOT" "auto_progress" "false" || exit 0
 
-# Resolve active task (resolve outputs plain slug text)
-TASK=$(GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb resolve --auto 2>/dev/null) || exit 0
-TASK=$(echo "$TASK" | tr -d '[:space:]')
+# Resolve active task
+RESOLVE_JSON=$(GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb resolve --auto --json 2>/dev/null) || RESOLVE_JSON='{}'
+TASK=$(echo "$RESOLVE_JSON" | jq -r '.slug // empty' 2>/dev/null) || TASK=""
 [ -z "$TASK" ] && exit 0
 
 # Checkout, append breadcrumb, commit
@@ -40,3 +40,10 @@ else
 fi
 
 GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb commit -m "Progress breadcrumb" "$TASK" 2>/dev/null || true
+
+# Clear agent bindings on session end
+if [ -n "$TASK" ]; then
+  GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb set "$TASK" agent_id= 2>/dev/null || true
+  GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb set "$TASK" worktree= 2>/dev/null || true
+  GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb commit -m "Unbind agent" "$TASK" 2>/dev/null || true
+fi

@@ -17,9 +17,9 @@ KB_ROOT=$(find_kb_root "$CWD") || exit 0  # No KB = no-op
 # Check config before any side effects
 hook_enabled "$KB_ROOT" "context_injection" "true" || { echo '{}'; exit 0; }
 
-# Resolve active task (resolve outputs plain slug text, not JSON)
-TASK=$(GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb resolve --auto 2>/dev/null) || TASK=""
-TASK=$(echo "$TASK" | tr -d '[:space:]')
+# Resolve active task
+RESOLVE_JSON=$(GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb resolve --auto --json 2>/dev/null) || RESOLVE_JSON='{}'
+TASK=$(echo "$RESOLVE_JSON" | jq -r '.slug // empty' 2>/dev/null) || TASK=""
 
 TASK_TITLE=""
 TASK_CONTENT=""

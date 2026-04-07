@@ -14,9 +14,9 @@ KB_ROOT=$(find_kb_root "$CWD") || exit 0
 
 hook_enabled "$KB_ROOT" "prompt_context" "false" || { echo '{}'; exit 0; }
 
-# Resolve active task (resolve outputs plain slug text)
-TASK=$(GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb resolve --auto 2>/dev/null) || { echo '{}'; exit 0; }
-TASK=$(echo "$TASK" | tr -d '[:space:]')
+# Resolve active task
+RESOLVE_JSON=$(GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb resolve --auto --json 2>/dev/null) || RESOLVE_JSON='{}'
+TASK=$(echo "$RESOLVE_JSON" | jq -r '.slug // empty' 2>/dev/null) || TASK=""
 [ -z "$TASK" ] && { echo '{}'; exit 0; }
 
 TASK_CONTENT=$(GITKB_ROOT="$KB_ROOT" git -C "$CWD" kb show "$TASK" 2>/dev/null) || TASK_CONTENT=""
