@@ -9,7 +9,7 @@ GitKB gives your agent persistent memory, structured task management, and deep c
 Install GitKB:
 
 ```bash
-brew install harmony-labs/tap/gitkb
+brew install gitkb/tap/gitkb
 # or
 curl -fsSL https://get.gitkb.com/install.sh | bash
 ```
