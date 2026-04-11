@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install git-kb and test deps
-        run: brew install harmony-labs/tap/gitkb bats-core parallel
+        run: brew install gitkb/tap/gitkb bats-core parallel
 
       - name: Verify git-kb
         run: git-kb --version
