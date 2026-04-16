@@ -78,8 +78,8 @@ teardown() {
 
 @test "session-start: no active task returns board only" {
   # Complete the test task so nothing is active
-  GITKB_ROOT="$TEST_KB_ROOT" git kb set tasks/test-1 status=completed 2>/dev/null
-  GITKB_ROOT="$TEST_KB_ROOT" git kb commit -m "complete" tasks/test-1 2>/dev/null
+  GITKB_ROOT="$TEST_KB_ROOT" git-kb set tasks/test-1 status=completed 2>/dev/null
+  GITKB_ROOT="$TEST_KB_ROOT" git-kb commit -m "complete" tasks/test-1 2>/dev/null
 
   local input
   input=$(build_hook_input "SessionStart" "$TEST_KB_ROOT" "source=startup")

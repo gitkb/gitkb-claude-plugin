@@ -14,6 +14,13 @@ brew install gitkb/tap/gitkb
 curl -fsSL https://get.gitkb.com/install.sh | bash
 ```
 
+Requires `jq` for JSON parsing (pre-installed on most systems):
+
+```bash
+brew install jq    # macOS
+apt install jq     # Debian/Ubuntu
+```
+
 Initialize in your project:
 
 ```bash

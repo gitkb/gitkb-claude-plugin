@@ -16,12 +16,27 @@ jobs:
         run: make lint
 
   test:
-    runs-on: macos-latest
+    # Self-hosted for sccache; fork PRs blocked for security
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted, macOS, ARM64]
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install git-kb and test deps
-        run: brew install gitkb/tap/gitkb bats-core parallel
+      - name: Install git-kb from source
+        env:
+          CARGO_HOME: ${{ runner.temp }}/cargo-home
+        run: |
+          INSTALL_DIR="${RUNNER_TEMP}/gitkb-bin"
+          SRC="${RUNNER_TEMP}/gitkb-src"
+          mkdir -p "$INSTALL_DIR" "$SRC/vendor" "$CARGO_HOME"
+          git clone --depth 1 https://github.com/gitkb/gitkb-core.git "$SRC/gitkb-core"
+          git clone --depth 1 https://github.com/gitkb/tree-sitter-markdown.git "$SRC/vendor/tree-sitter-markdown"
+          cargo install --path "$SRC/gitkb-core/crates/gitkb-cli" --root "$INSTALL_DIR"
+          rm -rf "$SRC"
+          echo "$INSTALL_DIR/bin" >> "$GITHUB_PATH"
+
+      - name: Install test deps
+        run: command -v bats >/dev/null || brew install bats-core parallel
 
       - name: Verify git-kb
         run: git-kb --version
