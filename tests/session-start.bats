@@ -105,10 +105,50 @@ teardown() {
   [[ "$ctx" == *"git-kb code doctor"* ]]
   [[ "$ctx" == *"git-kb code index"* ]]
   [[ "$ctx" == *"Do not require \`git-kb init\` for code intelligence"* ]]
+  [[ "$ctx" != *"Repository root:"* ]]
+  [[ "$ctx" != *"$repo"* ]]
 
   local wp
   wp=$(echo "$output" | jq -r '.hookSpecificOutput.watchPaths | length')
   [ "$wp" -eq 0 ]
+
+  rm -rf "$repo"
+}
+
+@test "session-start: malformed hook input returns empty JSON" {
+  local output
+  output=$(printf '{not-json' | "$SCRIPTS_DIR/session-start.sh" 2>/dev/null)
+
+  [ "$output" = "{}" ]
+  echo "$output" | jq empty
+}
+
+@test "session-start: missing cwd returns empty JSON" {
+  local output
+  output=$(printf '{"hook_event_name":"SessionStart"}' | "$SCRIPTS_DIR/session-start.sh" 2>/dev/null)
+
+  [ "$output" = "{}" ]
+  echo "$output" | jq empty
+}
+
+@test "session-start: quoted repo path keeps output valid and does not leak path" {
+  local repo
+  repo=$(mktemp -d "${TMPDIR:-/tmp}/gitkb quote \" path.XXXXXX")
+  git -C "$repo" init --quiet
+
+  local input
+  input=$(build_hook_input "SessionStart" "$repo" "source=startup")
+
+  local output
+  output=$(echo "$input" | GITKB_ROOT="" "$SCRIPTS_DIR/session-start.sh" 2>/dev/null)
+
+  assert_hook_output_valid "$output" "SessionStart"
+
+  local ctx
+  ctx=$(echo "$output" | jq -r '.hookSpecificOutput.additionalContext')
+  [[ "$ctx" == *"GitKB Code Intelligence"* ]]
+  [[ "$ctx" != *"Repository root:"* ]]
+  [[ "$ctx" != *"$repo"* ]]
 
   rm -rf "$repo"
 }
@@ -139,6 +179,56 @@ teardown() {
   [[ "$ctx" == *"curl -fsSL https://get.gitkb.com/install.sh | bash"* ]]
 
   rm -rf "$repo" "$tmpbin"
+}
+
+@test "session-start: git unavailable falls back to setup guidance" {
+  local repo tmpbin
+  repo=$(mktemp -d)
+  tmpbin=$(mktemp -d)
+  git -C "$repo" init --quiet
+
+  ln -s "$(command -v awk)" "$tmpbin/awk"
+  ln -s "$(command -v bash)" "$tmpbin/bash"
+  ln -s "$(command -v cat)" "$tmpbin/cat"
+  ln -s "$(command -v dirname)" "$tmpbin/dirname"
+  printf '#!/usr/bin/env bash\nexit 0\n' > "$tmpbin/git-kb"
+  chmod +x "$tmpbin/git-kb"
+
+  local input
+  input=$(build_hook_input "SessionStart" "$repo" "source=startup")
+
+  local output
+  output=$(echo "$input" | PATH="$tmpbin" GITKB_ROOT="" "$SCRIPTS_DIR/session-start.sh" 2>/dev/null)
+
+  assert_hook_output_valid "$output" "SessionStart"
+
+  local ctx
+  ctx=$(echo "$output" | jq -r '.hookSpecificOutput.additionalContext')
+  [[ "$ctx" == *"not inside a Git repo"* ]]
+
+  rm -rf "$repo" "$tmpbin"
+}
+
+@test "session-start: invalid GITKB_ROOT does not report full KB readiness" {
+  local repo bogus_root
+  repo=$(mktemp -d)
+  bogus_root=$(mktemp -d)
+  git -C "$repo" init --quiet
+
+  local input
+  input=$(build_hook_input "SessionStart" "$repo" "source=startup")
+
+  local output
+  output=$(echo "$input" | GITKB_ROOT="$bogus_root" "$SCRIPTS_DIR/session-start.sh" 2>/dev/null)
+
+  assert_hook_output_valid "$output" "SessionStart"
+
+  local ctx
+  ctx=$(echo "$output" | jq -r '.hookSpecificOutput.additionalContext')
+  [[ "$ctx" == *"GitKB Code Intelligence"* ]]
+  [[ "$ctx" != *"GitKB Ready"* ]]
+
+  rm -rf "$repo" "$bogus_root"
 }
 
 @test "session-start: no active task still returns setup guidance only" {

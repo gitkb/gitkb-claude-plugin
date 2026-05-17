@@ -1,5 +1,5 @@
 {
-  "description": "GitKB bootstrap hook for install-to-value guidance and optional KB context",
+  "description": "GitKB bootstrap hook for install-to-value guidance",
   "hooks": {
     "SessionStart": [
       {
