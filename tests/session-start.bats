@@ -9,7 +9,7 @@ teardown() {
   teardown_test_kb
 }
 
-@test "session-start: startup source returns board + active task" {
+@test "session-start: full KB returns canonical setup guidance" {
   local input
   input=$(build_hook_input "SessionStart" "$TEST_KB_ROOT" "source=startup")
 
@@ -18,19 +18,18 @@ teardown() {
 
   assert_hook_output_valid "$output" "SessionStart"
 
-  # Should contain board content
   local ctx
   ctx=$(echo "$output" | jq -r '.hookSpecificOutput.additionalContext')
-  [[ "$ctx" == *"KB Board"* ]]
-  [[ "$ctx" == *"tasks/test-1"* ]]
+  [[ "$ctx" == *"GitKB Ready"* ]]
+  [[ "$ctx" == *"git-kb init claude"* ]]
+  [[ "$ctx" != *"tasks/test-1"* ]]
 
-  # Should set watchPaths on startup
   local wp
   wp=$(echo "$output" | jq -r '.hookSpecificOutput.watchPaths | length')
-  [ "$wp" -gt 0 ]
+  [ "$wp" -eq 0 ]
 }
 
-@test "session-start: compact source returns post-compaction header" {
+@test "session-start: compact source does not inject active task context" {
   local input
   input=$(build_hook_input "SessionStart" "$TEST_KB_ROOT" "source=compact")
 
@@ -41,9 +40,10 @@ teardown() {
 
   local ctx
   ctx=$(echo "$output" | jq -r '.hookSpecificOutput.additionalContext')
-  [[ "$ctx" == *"post-compaction"* ]]
+  [[ "$ctx" == *"GitKB Ready"* ]]
+  [[ "$ctx" != *"post-compaction"* ]]
+  [[ "$ctx" != *"tasks/test-1"* ]]
 
-  # No watchPaths on compact (already set from startup)
   local wp
   wp=$(echo "$output" | jq -r '.hookSpecificOutput.watchPaths | length')
   [ "$wp" -eq 0 ]
@@ -57,6 +57,11 @@ teardown() {
   output=$(echo "$input" | "$SCRIPTS_DIR/session-start.sh" 2>/dev/null)
 
   assert_hook_output_valid "$output" "SessionStart"
+
+  local ctx
+  ctx=$(echo "$output" | jq -r '.hookSpecificOutput.additionalContext')
+  [[ "$ctx" == *"GitKB Ready"* ]]
+  [[ "$ctx" != *"tasks/test-1"* ]]
 }
 
 @test "session-start: no KB and no git repo returns setup guidance" {
@@ -136,7 +141,7 @@ teardown() {
   rm -rf "$repo" "$tmpbin"
 }
 
-@test "session-start: no active task returns board only" {
+@test "session-start: no active task still returns setup guidance only" {
   # Complete the test task so nothing is active
   GITKB_ROOT="$TEST_KB_ROOT" git-kb set tasks/test-1 status=completed 2>/dev/null
   GITKB_ROOT="$TEST_KB_ROOT" git-kb commit -m "complete" tasks/test-1 2>/dev/null
@@ -151,7 +156,6 @@ teardown() {
 
   local ctx
   ctx=$(echo "$output" | jq -r '.hookSpecificOutput.additionalContext')
-  [[ "$ctx" == *"KB Board"* ]]
-  # Should NOT have "Active Task" section
+  [[ "$ctx" == *"GitKB Ready"* ]]
   [[ "$ctx" != *"Active Task"* ]]
 }

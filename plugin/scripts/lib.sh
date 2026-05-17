@@ -71,18 +71,6 @@ json_escape() {
   printf '%s' "$value"
 }
 
-# Check if a hook feature is enabled via .kb/config.toml.
-# Returns 0 (enabled) or 1 (disabled).
-# When the key is missing from config, falls back to the provided default.
-#
-# Usage: hook_enabled "$KB_ROOT" "context_injection" "true" || exit 0
-hook_enabled() {
-  local kb_root="$1" key="$2" default="${3:-true}"
-  local val
-  val=$(GITKB_ROOT="$kb_root" git-kb config get "hooks.$key" 2>/dev/null) || val="$default"
-  [ "$val" = "true" ]
-}
-
 # Resolve CWD from hook JSON input. Returns empty and exits if invalid.
 # Usage: CWD=$(resolve_cwd "$INPUT") || exit 0
 resolve_cwd() {
