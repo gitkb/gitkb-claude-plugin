@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # Shared functions for GitKB hook scripts.
 
+command_exists() {
+  command -v "$1" >/dev/null 2>&1
+}
+
 # Check if a hook feature is enabled via .kb/config.toml.
 # Returns 0 (enabled) or 1 (disabled).
 # When the key is missing from config, falls back to the provided default.
@@ -45,6 +49,13 @@ find_kb_root() {
     dir=$(dirname "$dir")
   done
   return 1
+}
+
+# Return the nearest git root for code-only GitKB flows.
+# This is intentionally separate from find_kb_root so KB semantics stay strict.
+find_git_root() {
+  local cwd="$1"
+  git -C "$cwd" rev-parse --show-toplevel 2>/dev/null
 }
 
 # Detect which repo CWD is in by matching against git-kb repo list.

@@ -59,7 +59,7 @@ teardown() {
   assert_hook_output_valid "$output" "SessionStart"
 }
 
-@test "session-start: no KB returns empty JSON" {
+@test "session-start: no KB and no git repo returns setup guidance" {
   local no_kb_dir
   no_kb_dir=$(mktemp -d)
 
@@ -70,10 +70,69 @@ teardown() {
   # Force GITKB_ROOT="" so the script won't walk up past the temp dir
   output=$(echo "$input" | GITKB_ROOT="" "$SCRIPTS_DIR/session-start.sh" 2>/dev/null)
 
-  # Should exit 0 with no content (no KB found)
-  assert_hook_noop "$output"
+  assert_hook_output_valid "$output" "SessionStart"
+
+  local ctx
+  ctx=$(echo "$output" | jq -r '.hookSpecificOutput.additionalContext')
+  [[ "$ctx" == *"not inside a Git repo"* ]]
+  [[ "$ctx" == *"git-kb init"* ]]
 
   rm -rf "$no_kb_dir"
+}
+
+@test "session-start: plain git repo returns init-free code-intel guidance" {
+  local repo
+  repo=$(mktemp -d)
+  git -C "$repo" init --quiet
+
+  local input
+  input=$(build_hook_input "SessionStart" "$repo" "source=startup")
+
+  local output
+  output=$(echo "$input" | GITKB_ROOT="" "$SCRIPTS_DIR/session-start.sh" 2>/dev/null)
+
+  assert_hook_output_valid "$output" "SessionStart"
+
+  local ctx
+  ctx=$(echo "$output" | jq -r '.hookSpecificOutput.additionalContext')
+  [[ "$ctx" == *"GitKB Code Intelligence"* ]]
+  [[ "$ctx" == *"works without initialization"* ]]
+  [[ "$ctx" == *"git-kb code doctor"* ]]
+  [[ "$ctx" == *"git-kb code index"* ]]
+  [[ "$ctx" == *"Do not require \`git-kb init\` for code intelligence"* ]]
+
+  local wp
+  wp=$(echo "$output" | jq -r '.hookSpecificOutput.watchPaths | length')
+  [ "$wp" -eq 0 ]
+
+  rm -rf "$repo"
+}
+
+@test "session-start: missing git-kb returns install guidance" {
+  local repo tmpbin
+  repo=$(mktemp -d)
+  tmpbin=$(mktemp -d)
+  git -C "$repo" init --quiet
+
+  ln -s "$(command -v bash)" "$tmpbin/bash"
+  ln -s "$(command -v git)" "$tmpbin/git"
+  ln -s "$(command -v jq)" "$tmpbin/jq"
+
+  local input
+  input=$(build_hook_input "SessionStart" "$repo" "source=startup")
+
+  local output
+  output=$(echo "$input" | PATH="$tmpbin:/usr/bin:/bin" GITKB_ROOT="" "$SCRIPTS_DIR/session-start.sh" 2>/dev/null)
+
+  assert_hook_output_valid "$output" "SessionStart"
+
+  local ctx
+  ctx=$(echo "$output" | jq -r '.hookSpecificOutput.additionalContext')
+  [[ "$ctx" == *"GitKB CLI is not installed"* ]]
+  [[ "$ctx" == *"brew install gitkb/tap/gitkb"* ]]
+  [[ "$ctx" == *"curl -fsSL https://get.gitkb.com/install.sh | bash"* ]]
+
+  rm -rf "$repo" "$tmpbin"
 }
 
 @test "session-start: no active task returns board only" {
