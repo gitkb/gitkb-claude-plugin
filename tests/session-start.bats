@@ -114,15 +114,16 @@ teardown() {
   tmpbin=$(mktemp -d)
   git -C "$repo" init --quiet
 
+  ln -s "$(command -v awk)" "$tmpbin/awk"
   ln -s "$(command -v bash)" "$tmpbin/bash"
-  ln -s "$(command -v git)" "$tmpbin/git"
-  ln -s "$(command -v jq)" "$tmpbin/jq"
+  ln -s "$(command -v cat)" "$tmpbin/cat"
+  ln -s "$(command -v dirname)" "$tmpbin/dirname"
 
   local input
   input=$(build_hook_input "SessionStart" "$repo" "source=startup")
 
   local output
-  output=$(echo "$input" | PATH="$tmpbin:/usr/bin:/bin" GITKB_ROOT="" "$SCRIPTS_DIR/session-start.sh" 2>/dev/null)
+  output=$(echo "$input" | PATH="$tmpbin" GITKB_ROOT="" "$SCRIPTS_DIR/session-start.sh" 2>/dev/null)
 
   assert_hook_output_valid "$output" "SessionStart"
 

@@ -39,14 +39,6 @@ brew install gitkb/tap/gitkb
 curl -fsSL https://get.gitkb.com/install.sh | bash
 ```
 
-The SessionStart hook uses `jq` to parse Claude hook payloads:
-
-```bash
-brew install jq
-# or on Debian/Ubuntu
-apt install jq
-```
-
 If `git-kb` is missing, the plugin tells Claude how to guide you through installation instead of failing through MCP startup.
 
 ## Optional Full KB Setup
