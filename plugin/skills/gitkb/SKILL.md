@@ -1,11 +1,11 @@
 ---
 name: gitkb
-description: Use GitKB from Claude Code for local code intelligence first, with optional persistent KB setup. Use when the user asks about callers, callees, impact, symbols, dead code, codebase structure, GitKB setup, tasks, or knowledge management.
+description: Use GitKB from Claude Code for local code intelligence first, with full persistent knowledge graph setup when the user wants tasks, decisions, architecture, sync, or team context. Use when the user asks about callers, callees, impact, symbols, dead code, codebase structure, GitKB setup, tasks, or knowledge management.
 ---
 
 # GitKB Bootstrap
 
-GitKB is a local CLI for code intelligence and optional durable project memory. Do not assume MCP is available. Use Bash/CLI first unless the project already has full GitKB/Claude setup.
+GitKB is a local CLI for code intelligence and a persistent knowledge graph for tasks, decisions, architecture, sync, and team context. Do not assume MCP is available. Use Bash/CLI first unless the project already has full GitKB/Claude setup.
 
 ## First Checks
 
