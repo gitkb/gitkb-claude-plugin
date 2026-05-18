@@ -1,8 +1,8 @@
 # GitKB for Claude Code
 
-Local code intelligence for Claude Code, with optional durable project memory when you want it.
+Local code intelligence for Claude Code, backed by GitKB's persistent knowledge graph for tasks, decisions, architecture, and team sync.
 
-GitKB lets Claude inspect symbols, callers, callees, impact, dead code, language coverage, and service-edge patterns through the `git-kb` CLI. Code intelligence works in a normal Git repo without `git-kb init`.
+GitKB lets Claude inspect symbols, callers, callees, impact, dead code, language coverage, and service-edge patterns through the `git-kb` CLI. When you initialize the full KB, those code facts connect to durable tasks, specs, decisions, architecture, and synced team knowledge.
 
 ## First Value
 

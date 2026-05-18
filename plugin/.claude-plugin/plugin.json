@@ -1,6 +1,6 @@
 {
   "name": "gitkb",
-  "description": "Local code intelligence and optional durable project memory for Claude Code. Works through the git-kb CLI first; full KB and MCP setup are guided when you opt in.",
+  "description": "Local code intelligence for Claude Code, backed by GitKB's persistent knowledge graph for tasks, decisions, architecture, and team sync.",
   "version": "0.1.0",
   "author": {
     "name": "GitKB",
