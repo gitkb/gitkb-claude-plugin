@@ -1,0 +1,16 @@
+{
+  "name": "gitkb",
+  "description": "Give Claude Code instant local code intelligence: symbols, callers, impact analysis, dead-code detection, service edges, and optional durable project memory.",
+  "owner": {
+    "name": "GitKB",
+    "url": "https://gitkb.com"
+  },
+  "plugins": [
+    {
+      "name": "gitkb",
+      "source": "./plugin",
+      "description": "Instant local code intelligence for Claude Code, with symbols, callers, impact analysis, dead-code detection, service edges, and optional durable project memory.",
+      "version": "0.1.0"
+    }
+  ]
+}
