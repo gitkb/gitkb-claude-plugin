@@ -1,23 +1,81 @@
 #!/usr/bin/env bash
 # Shared functions for GitKB hook scripts.
 
-# Check if a hook feature is enabled via .kb/config.toml.
-# Returns 0 (enabled) or 1 (disabled).
-# When the key is missing from config, falls back to the provided default.
-#
-# Usage: hook_enabled "$KB_ROOT" "context_injection" "true" || exit 0
-hook_enabled() {
-  local kb_root="$1" key="$2" default="${3:-true}"
-  local val
-  val=$(GITKB_ROOT="$kb_root" git-kb config get "hooks.$key" 2>/dev/null) || val="$default"
-  [ "$val" = "true" ]
+command_exists() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+json_get_string() {
+  local input="$1" key="$2"
+  awk -v key="$key" '
+    BEGIN { RS = "\0" }
+    {
+      target = "\"" key "\""
+      start = index($0, target)
+      if (start == 0) {
+        exit 1
+      }
+      i = start + length(target)
+      len = length($0)
+      while (i <= len && substr($0, i, 1) ~ /[ \t\r\n]/) {
+        i++
+      }
+      if (substr($0, i, 1) != ":") {
+        exit 1
+      }
+      i++
+      while (i <= len && substr($0, i, 1) ~ /[ \t\r\n]/) {
+        i++
+      }
+      if (substr($0, i, 1) != "\"") {
+        exit 1
+      }
+      i++
+      out = ""
+      while (i <= len) {
+        c = substr($0, i, 1)
+        if (c == "\"") {
+          print out
+          exit 0
+        }
+        if (c == "\\") {
+          i++
+          esc = substr($0, i, 1)
+          if (esc == "n") {
+            out = out "\n"
+          } else if (esc == "r") {
+            out = out "\r"
+          } else if (esc == "t") {
+            out = out "\t"
+          } else {
+            out = out esc
+          }
+          i++
+          continue
+        }
+        out = out c
+        i++
+      }
+      exit 1
+    }
+  ' <<<"$input"
+}
+
+json_escape() {
+  local value="$1"
+  value=${value//\\/\\\\}
+  value=${value//\"/\\\"}
+  value=${value//$'\n'/\\n}
+  value=${value//$'\r'/\\r}
+  value=${value//$'\t'/\\t}
+  printf '%s' "$value"
 }
 
 # Resolve CWD from hook JSON input. Returns empty and exits if invalid.
 # Usage: CWD=$(resolve_cwd "$INPUT") || exit 0
 resolve_cwd() {
   local raw
-  raw=$(echo "$1" | jq -r '.cwd // empty')
+  raw=$(json_get_string "$1" "cwd") || return 1
   [ -z "$raw" ] && return 1
   # Resolve to absolute path to prevent infinite dirname loops on relative paths
   local resolved
@@ -47,24 +105,9 @@ find_kb_root() {
   return 1
 }
 
-# Detect which repo CWD is in by matching against git-kb repo list.
-# Falls back to git remote name for single-repo KBs.
-# Usage: REPO=$(detect_repo "$KB_ROOT" "$CWD")
-detect_repo() {
-  local kb_root="$1" cwd="$2"
-  local rel_path="${cwd#"$kb_root"/}"
-  local repo_name
-  repo_name=$(GITKB_ROOT="$kb_root" git-kb repo list --json 2>/dev/null | \
-    jq -r --arg rel "$rel_path" '.[] | select(.path != null and .path != ".") | select(($rel == .path) or ($rel | startswith(.path + "/"))) | .name' | head -1) || repo_name=""
-  if [ -n "$repo_name" ]; then
-    echo "$repo_name"
-    return
-  fi
-  local remote_url
-  remote_url=$(git -C "$cwd" remote get-url origin 2>/dev/null) || remote_url=""
-  if [ -n "$remote_url" ]; then
-    echo "$remote_url" | sed 's/.*\///' | sed 's/\.git$//'
-    return
-  fi
-  basename "$cwd"
+# Return the nearest git root for code-only GitKB flows.
+# This is intentionally separate from find_kb_root so KB semantics stay strict.
+find_git_root() {
+  local cwd="$1"
+  git -C "$cwd" rev-parse --show-toplevel 2>/dev/null
 }

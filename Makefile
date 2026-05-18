@@ -18,6 +18,11 @@ lint:
 	@jq empty plugin/hooks/hooks.json
 	@echo "Checking plugin.json is valid JSON..."
 	@jq empty plugin/.claude-plugin/plugin.json
+	@echo "Checking plugin does not require MCP for first value..."
+	@test ! -f plugin/.mcp.json
+	@! jq -e 'has("mcpServers")' plugin/.claude-plugin/plugin.json >/dev/null
+	@echo "Checking plugin does not vendor duplicated command surface..."
+	@test ! -d plugin/commands || [ -z "$$(find plugin/commands -type f -print -quit)" ]
 	@echo "All checks passed."
 
 clean:

@@ -9,7 +9,7 @@ teardown() {
   teardown_test_kb
 }
 
-@test "session-start: startup source returns board + active task" {
+@test "session-start: full KB returns canonical setup guidance" {
   local input
   input=$(build_hook_input "SessionStart" "$TEST_KB_ROOT" "source=startup")
 
@@ -18,19 +18,18 @@ teardown() {
 
   assert_hook_output_valid "$output" "SessionStart"
 
-  # Should contain board content
   local ctx
   ctx=$(echo "$output" | jq -r '.hookSpecificOutput.additionalContext')
-  [[ "$ctx" == *"KB Board"* ]]
-  [[ "$ctx" == *"tasks/test-1"* ]]
+  [[ "$ctx" == *"GitKB Ready"* ]]
+  [[ "$ctx" == *"git-kb init claude"* ]]
+  [[ "$ctx" != *"tasks/test-1"* ]]
 
-  # Should set watchPaths on startup
   local wp
   wp=$(echo "$output" | jq -r '.hookSpecificOutput.watchPaths | length')
-  [ "$wp" -gt 0 ]
+  [ "$wp" -eq 0 ]
 }
 
-@test "session-start: compact source returns post-compaction header" {
+@test "session-start: compact source does not inject active task context" {
   local input
   input=$(build_hook_input "SessionStart" "$TEST_KB_ROOT" "source=compact")
 
@@ -41,9 +40,10 @@ teardown() {
 
   local ctx
   ctx=$(echo "$output" | jq -r '.hookSpecificOutput.additionalContext')
-  [[ "$ctx" == *"post-compaction"* ]]
+  [[ "$ctx" == *"GitKB Ready"* ]]
+  [[ "$ctx" != *"post-compaction"* ]]
+  [[ "$ctx" != *"tasks/test-1"* ]]
 
-  # No watchPaths on compact (already set from startup)
   local wp
   wp=$(echo "$output" | jq -r '.hookSpecificOutput.watchPaths | length')
   [ "$wp" -eq 0 ]
@@ -57,9 +57,14 @@ teardown() {
   output=$(echo "$input" | "$SCRIPTS_DIR/session-start.sh" 2>/dev/null)
 
   assert_hook_output_valid "$output" "SessionStart"
+
+  local ctx
+  ctx=$(echo "$output" | jq -r '.hookSpecificOutput.additionalContext')
+  [[ "$ctx" == *"GitKB Ready"* ]]
+  [[ "$ctx" != *"tasks/test-1"* ]]
 }
 
-@test "session-start: no KB returns empty JSON" {
+@test "session-start: no KB and no git repo returns setup guidance" {
   local no_kb_dir
   no_kb_dir=$(mktemp -d)
 
@@ -70,13 +75,163 @@ teardown() {
   # Force GITKB_ROOT="" so the script won't walk up past the temp dir
   output=$(echo "$input" | GITKB_ROOT="" "$SCRIPTS_DIR/session-start.sh" 2>/dev/null)
 
-  # Should exit 0 with no content (no KB found)
-  assert_hook_noop "$output"
+  assert_hook_output_valid "$output" "SessionStart"
+
+  local ctx
+  ctx=$(echo "$output" | jq -r '.hookSpecificOutput.additionalContext')
+  [[ "$ctx" == *"not inside a Git repo"* ]]
+  [[ "$ctx" == *"git-kb init"* ]]
 
   rm -rf "$no_kb_dir"
 }
 
-@test "session-start: no active task returns board only" {
+@test "session-start: plain git repo returns init-free code-intel guidance" {
+  local repo
+  repo=$(mktemp -d)
+  git -C "$repo" init --quiet
+
+  local input
+  input=$(build_hook_input "SessionStart" "$repo" "source=startup")
+
+  local output
+  output=$(echo "$input" | GITKB_ROOT="" "$SCRIPTS_DIR/session-start.sh" 2>/dev/null)
+
+  assert_hook_output_valid "$output" "SessionStart"
+
+  local ctx
+  ctx=$(echo "$output" | jq -r '.hookSpecificOutput.additionalContext')
+  [[ "$ctx" == *"GitKB Code Intelligence"* ]]
+  [[ "$ctx" == *"works without initialization"* ]]
+  [[ "$ctx" == *"git-kb code doctor"* ]]
+  [[ "$ctx" == *"git-kb code index"* ]]
+  [[ "$ctx" == *"Do not require \`git-kb init\` for code intelligence"* ]]
+  [[ "$ctx" != *"Repository root:"* ]]
+  [[ "$ctx" != *"$repo"* ]]
+
+  local wp
+  wp=$(echo "$output" | jq -r '.hookSpecificOutput.watchPaths | length')
+  [ "$wp" -eq 0 ]
+
+  rm -rf "$repo"
+}
+
+@test "session-start: malformed hook input returns empty JSON" {
+  local output
+  output=$(printf '{not-json' | "$SCRIPTS_DIR/session-start.sh" 2>/dev/null)
+
+  [ "$output" = "{}" ]
+  echo "$output" | jq empty
+}
+
+@test "session-start: missing cwd returns empty JSON" {
+  local output
+  output=$(printf '{"hook_event_name":"SessionStart"}' | "$SCRIPTS_DIR/session-start.sh" 2>/dev/null)
+
+  [ "$output" = "{}" ]
+  echo "$output" | jq empty
+}
+
+@test "session-start: quoted repo path keeps output valid and does not leak path" {
+  local repo
+  repo=$(mktemp -d "${TMPDIR:-/tmp}/gitkb quote \" path.XXXXXX")
+  git -C "$repo" init --quiet
+
+  local input
+  input=$(build_hook_input "SessionStart" "$repo" "source=startup")
+
+  local output
+  output=$(echo "$input" | GITKB_ROOT="" "$SCRIPTS_DIR/session-start.sh" 2>/dev/null)
+
+  assert_hook_output_valid "$output" "SessionStart"
+
+  local ctx
+  ctx=$(echo "$output" | jq -r '.hookSpecificOutput.additionalContext')
+  [[ "$ctx" == *"GitKB Code Intelligence"* ]]
+  [[ "$ctx" != *"Repository root:"* ]]
+  [[ "$ctx" != *"$repo"* ]]
+
+  rm -rf "$repo"
+}
+
+@test "session-start: missing git-kb returns install guidance" {
+  local repo tmpbin
+  repo=$(mktemp -d)
+  tmpbin=$(mktemp -d)
+  git -C "$repo" init --quiet
+
+  ln -s "$(command -v awk)" "$tmpbin/awk"
+  ln -s "$(command -v bash)" "$tmpbin/bash"
+  ln -s "$(command -v cat)" "$tmpbin/cat"
+  ln -s "$(command -v dirname)" "$tmpbin/dirname"
+
+  local input
+  input=$(build_hook_input "SessionStart" "$repo" "source=startup")
+
+  local output
+  output=$(echo "$input" | PATH="$tmpbin" GITKB_ROOT="" "$SCRIPTS_DIR/session-start.sh" 2>/dev/null)
+
+  assert_hook_output_valid "$output" "SessionStart"
+
+  local ctx
+  ctx=$(echo "$output" | jq -r '.hookSpecificOutput.additionalContext')
+  [[ "$ctx" == *"GitKB CLI is not installed"* ]]
+  [[ "$ctx" == *"brew install gitkb/tap/gitkb"* ]]
+  [[ "$ctx" == *"curl -fsSL https://get.gitkb.com/install.sh | bash"* ]]
+
+  rm -rf "$repo" "$tmpbin"
+}
+
+@test "session-start: git unavailable falls back to setup guidance" {
+  local repo tmpbin
+  repo=$(mktemp -d)
+  tmpbin=$(mktemp -d)
+  git -C "$repo" init --quiet
+
+  ln -s "$(command -v awk)" "$tmpbin/awk"
+  ln -s "$(command -v bash)" "$tmpbin/bash"
+  ln -s "$(command -v cat)" "$tmpbin/cat"
+  ln -s "$(command -v dirname)" "$tmpbin/dirname"
+  printf '#!/usr/bin/env bash\nexit 0\n' > "$tmpbin/git-kb"
+  chmod +x "$tmpbin/git-kb"
+
+  local input
+  input=$(build_hook_input "SessionStart" "$repo" "source=startup")
+
+  local output
+  output=$(echo "$input" | PATH="$tmpbin" GITKB_ROOT="" "$SCRIPTS_DIR/session-start.sh" 2>/dev/null)
+
+  assert_hook_output_valid "$output" "SessionStart"
+
+  local ctx
+  ctx=$(echo "$output" | jq -r '.hookSpecificOutput.additionalContext')
+  [[ "$ctx" == *"not inside a Git repo"* ]]
+
+  rm -rf "$repo" "$tmpbin"
+}
+
+@test "session-start: invalid GITKB_ROOT does not report full KB readiness" {
+  local repo bogus_root
+  repo=$(mktemp -d)
+  bogus_root=$(mktemp -d)
+  git -C "$repo" init --quiet
+
+  local input
+  input=$(build_hook_input "SessionStart" "$repo" "source=startup")
+
+  local output
+  output=$(echo "$input" | GITKB_ROOT="$bogus_root" "$SCRIPTS_DIR/session-start.sh" 2>/dev/null)
+
+  assert_hook_output_valid "$output" "SessionStart"
+
+  local ctx
+  ctx=$(echo "$output" | jq -r '.hookSpecificOutput.additionalContext')
+  [[ "$ctx" == *"GitKB Code Intelligence"* ]]
+  [[ "$ctx" != *"GitKB Ready"* ]]
+
+  rm -rf "$repo" "$bogus_root"
+}
+
+@test "session-start: no active task still returns setup guidance only" {
   # Complete the test task so nothing is active
   GITKB_ROOT="$TEST_KB_ROOT" git-kb set tasks/test-1 status=completed 2>/dev/null
   GITKB_ROOT="$TEST_KB_ROOT" git-kb commit -m "complete" tasks/test-1 2>/dev/null
@@ -91,7 +246,6 @@ teardown() {
 
   local ctx
   ctx=$(echo "$output" | jq -r '.hookSpecificOutput.additionalContext')
-  [[ "$ctx" == *"KB Board"* ]]
-  # Should NOT have "Active Task" section
+  [[ "$ctx" == *"GitKB Ready"* ]]
   [[ "$ctx" != *"Active Task"* ]]
 }

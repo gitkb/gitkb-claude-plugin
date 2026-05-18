@@ -1,23 +1,21 @@
 {
   "name": "gitkb",
-  "description": "Knowledge base and code intelligence for AI-native development. Persistent agent memory, task management, call graphs, impact analysis, and 42 MCP tools — all local, all free.",
+  "description": "Local code intelligence and optional durable project memory for Claude Code. Works through the git-kb CLI first; full KB and MCP setup are guided when you opt in.",
   "version": "0.1.0",
   "author": {
     "name": "GitKB",
     "url": "https://gitkb.com"
   },
   "homepage": "https://gitkb.com/docs",
+  "repository": "https://github.com/gitkb/gitkb-claude-plugin",
+  "license": "MIT",
   "keywords": [
-    "knowledge-base",
     "code-intelligence",
-    "mcp",
+    "knowledge-base",
     "task-management",
-    "developer-tools"
+    "developer-tools",
+    "claude-code"
   ],
-  "mcpServers": {
-    "gitkb": {
-      "command": "git-kb",
-      "args": ["mcp"]
-    }
-  }
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks.json"
 }
