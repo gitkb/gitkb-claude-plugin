@@ -1,6 +1,7 @@
-CLAUDE_PLUGIN_VALIDATE ?= claude-plugin-validate
+CLAUDE_PLUGIN_VALIDATE ?= claude plugin validate
+CLAUDE_PLUGIN_VALIDATE_STANDALONE ?= claude-plugin-validate
 
-.PHONY: all test test-hooks lint lint-executable lint-json lint-policy shellcheck validate validate-marketplace validate-plugin diff-check release-check clean
+.PHONY: all test test-hooks lint lint-executable lint-json lint-policy shellcheck validate validate-marketplace validate-plugin validate-standalone diff-check release-check clean
 
 all: lint test
 
@@ -45,6 +46,9 @@ validate-marketplace:
 
 validate-plugin:
 	$(CLAUDE_PLUGIN_VALIDATE) plugin
+
+validate-standalone:
+	$(CLAUDE_PLUGIN_VALIDATE_STANDALONE) plugin
 
 diff-check:
 	git diff --check
