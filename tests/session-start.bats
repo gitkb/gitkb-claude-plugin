@@ -191,7 +191,7 @@ teardown() {
   ln -s "$(command -v bash)" "$tmpbin/bash"
   ln -s "$(command -v cat)" "$tmpbin/cat"
   ln -s "$(command -v dirname)" "$tmpbin/dirname"
-  printf '#!/usr/bin/env bash\nexit 0\n' > "$tmpbin/git-kb"
+  printf '#!/usr/bin/env bash\nexit 1\n' > "$tmpbin/git-kb"
   chmod +x "$tmpbin/git-kb"
 
   local input
