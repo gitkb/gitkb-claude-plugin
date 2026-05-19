@@ -1,7 +1,7 @@
 CLAUDE_PLUGIN_VALIDATE ?= claude plugin validate
 CLAUDE_PLUGIN_VALIDATE_STANDALONE ?= claude-plugin-validate
 
-.PHONY: all test test-hooks lint lint-executable lint-json lint-policy shellcheck validate validate-marketplace validate-plugin validate-standalone diff-check release-check clean
+.PHONY: all test test-hooks lint lint-executable lint-json lint-policy shellcheck lint-validate validate validate-marketplace validate-plugin validate-standalone diff-check release-check clean
 
 all: lint test
 
@@ -10,7 +10,7 @@ test: test-hooks
 test-hooks:
 	bats tests/ --jobs 4
 
-lint: lint-executable lint-json lint-policy shellcheck
+lint: lint-executable lint-json lint-policy shellcheck lint-validate
 	@echo "All checks passed."
 
 lint-executable:
@@ -38,6 +38,14 @@ lint-policy:
 
 shellcheck:
 	shellcheck -x plugin/scripts/*.sh tests/helpers/setup.bash
+
+lint-validate:
+	@if command -v claude >/dev/null 2>&1; then \
+		echo "Validating plugin manifest with Claude CLI..."; \
+		$(CLAUDE_PLUGIN_VALIDATE) plugin; \
+	else \
+		echo "Skipping plugin validation (claude CLI not available)"; \
+	fi
 
 validate: validate-marketplace validate-plugin
 
