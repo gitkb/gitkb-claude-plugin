@@ -82,32 +82,3 @@ resolve_cwd() {
   resolved=$(cd "$raw" 2>/dev/null && pwd) || return 1
   echo "$resolved"
 }
-
-# Walk up from a directory to find the nearest .kb/ root.
-# Honors GITKB_ROOT env var override (empty = no KB).
-# Usage: KB_ROOT=$(find_kb_root "$CWD") || exit 0
-find_kb_root() {
-  # If GITKB_ROOT is explicitly set, trust it (empty = no KB)
-  if [ "${GITKB_ROOT+set}" = "set" ]; then
-    if [ -n "$GITKB_ROOT" ] && [ -d "$GITKB_ROOT/.kb" ]; then
-      echo "$GITKB_ROOT"
-      return 0
-    fi
-    return 1
-  fi
-  local dir="$1"
-  local prev=""
-  while [ "$dir" != "/" ] && [ "$dir" != "$prev" ]; do
-    [ -d "$dir/.kb" ] && echo "$dir" && return 0
-    prev="$dir"
-    dir=$(dirname "$dir")
-  done
-  return 1
-}
-
-# Return the nearest git root for code-only GitKB flows.
-# This is intentionally separate from find_kb_root so KB semantics stay strict.
-find_git_root() {
-  local cwd="$1"
-  git -C "$cwd" rev-parse --show-toplevel 2>/dev/null
-}

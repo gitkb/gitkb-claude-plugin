@@ -26,6 +26,17 @@ curl -fsSL https://get.gitkb.com/install.sh | bash
 
 If the current directory is not a Git repo, explain that code intelligence needs a Git repo.
 
+## Prefer Code Intelligence Over Grep
+
+When exploring code relationships, prefer `git-kb code` over grep. Grep matches text; `git-kb code` understands the AST and call graph.
+
+| Instead of | Use |
+|---|---|
+| grep for function callers | `git-kb code callers "<symbol>"` |
+| grep for definitions | `git-kb code symbols --file <path>` |
+| grep to assess change impact | `git-kb code impact <path>` |
+| manual dead code search | `git-kb code dead` |
+
 ## Code Intelligence Without `.kb`
 
 GitKB code intelligence works in a normal Git repo without `git-kb init`.
