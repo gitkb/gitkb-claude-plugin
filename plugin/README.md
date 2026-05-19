@@ -17,14 +17,14 @@ Install the plugin, open a Git repo, and ask Claude about the code:
 Claude will use local commands such as:
 
 ```bash
-git-kb code doctor
+git-kb code doctor --json
 git-kb code index
-git-kb code symbols
-git-kb code callers "<symbol>"
-git-kb code callees "<symbol>"
-git-kb code impact path/to/file
-git-kb code dead
-git-kb code query
+git-kb code symbols --json
+git-kb code callers "<symbol>" --json
+git-kb code callees "<symbol>" --json
+git-kb code impact path/to/file --json
+git-kb code dead --json
+git-kb code query hotspots --json
 ```
 
 No `.kb` project is required for those code intelligence commands.
