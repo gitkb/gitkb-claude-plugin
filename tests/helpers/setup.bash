@@ -25,7 +25,8 @@ setup_test_kb() {
   GITKB_ROOT="$TEST_KB_ROOT" git-kb create \
     --type task \
     --slug tasks/test-1 \
-    --title "Test Task" 2>/dev/null
+    --title "Test Task" \
+    --json 2>/dev/null
 
   GITKB_ROOT="$TEST_KB_ROOT" git-kb commit -m "test task" tasks/test-1 2>/dev/null
 

@@ -32,10 +32,10 @@ When exploring code relationships, prefer `git-kb code` over grep. Grep matches 
 
 | Instead of | Use |
 |---|---|
-| grep for function callers | `git-kb code callers "<symbol>"` |
-| grep for definitions | `git-kb code symbols --file <path>` |
-| grep to assess change impact | `git-kb code impact <path>` |
-| manual dead code search | `git-kb code dead` |
+| grep for function callers | `git-kb code callers "<symbol>" --json` |
+| grep for definitions | `git-kb code symbols --file <path> --json` |
+| grep to assess change impact | `git-kb code impact <path> --json` |
+| manual dead code search | `git-kb code dead --json` |
 
 ## Code Intelligence Without `.kb`
 
@@ -44,18 +44,18 @@ GitKB code intelligence works in a normal Git repo without `git-kb init`.
 Use these commands for code questions:
 
 ```bash
-git-kb code doctor
+git-kb code doctor --json
 git-kb code index
-git-kb code symbols
-git-kb code symbols --file path/to/file
-git-kb code callers "<symbol>"
-git-kb code callees "<symbol>"
-git-kb code impact path/to/file
-git-kb code dead
-git-kb code query
+git-kb code symbols --json
+git-kb code symbols --file path/to/file --json
+git-kb code callers "<symbol>" --json
+git-kb code callees "<symbol>" --json
+git-kb code impact path/to/file --json
+git-kb code dead --json
+git-kb code query hotspots --json
 ```
 
-Run `git-kb code doctor` first when you need to understand index health or language support. Run `git-kb code index` before first analysis or after large code changes.
+Run `git-kb code doctor --json` first when you need to understand index health or language support. Run `git-kb code index` before first analysis or after large code changes.
 
 Use GitKB code intelligence before broad refactors, symbol renames, dead-code removal, dependency cleanup, service-edge analysis, or questions about how code flows through the repository.
 

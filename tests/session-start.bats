@@ -22,6 +22,7 @@ teardown() {
   ctx=$(echo "$output" | jq -r '.hookSpecificOutput.additionalContext')
   [[ "$ctx" == *"GitKB Ready"* ]]
   [[ "$ctx" == *"git-kb init claude"* ]]
+  [[ "$ctx" == *"git-kb doctor --check repos,code,kb --json"* ]]
   [[ "$ctx" != *"tasks/test-1"* ]]
 
   local wp
@@ -102,8 +103,12 @@ teardown() {
   ctx=$(echo "$output" | jq -r '.hookSpecificOutput.additionalContext')
   [[ "$ctx" == *"GitKB Code Intelligence"* ]]
   [[ "$ctx" == *"works without initialization"* ]]
-  [[ "$ctx" == *"git-kb code doctor"* ]]
+  [[ "$ctx" == *"git-kb code doctor --json"* ]]
   [[ "$ctx" == *"git-kb code index"* ]]
+  [[ "$ctx" == *"git-kb code symbols --json"* ]]
+  [[ "$ctx" == *"git-kb code callers <symbol> --json"* ]]
+  [[ "$ctx" == *"git-kb code query hotspots --json"* ]]
+  [[ "$ctx" == *"JSON output preserves complete symbol IDs and stable fields"* ]]
   [[ "$ctx" == *"Do not require \`git-kb init\` for code intelligence"* ]]
   [[ "$ctx" != *"Repository root:"* ]]
   [[ "$ctx" != *"$repo"* ]]
@@ -177,6 +182,7 @@ teardown() {
   [[ "$ctx" == *"GitKB CLI is not installed"* ]]
   [[ "$ctx" == *"brew install gitkb/tap/gitkb"* ]]
   [[ "$ctx" == *"curl -fsSL https://get.gitkb.com/install.sh | bash"* ]]
+  [[ "$ctx" == *"git-kb code doctor --json"* ]]
 
   rm -rf "$repo" "$tmpbin"
 }
