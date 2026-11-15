@@ -16,26 +16,23 @@ jobs:
         run: make lint
 
   test:
-    # Fork PRs skip this job: it uses the repo token to clone gitkb sources
+    # Fork PRs skip this job
     if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install git-kb from source
+      - name: Install released git-kb
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           INSTALL_DIR="${RUNNER_TEMP}/gitkb-bin"
-          SRC="${RUNNER_TEMP}/gitkb-src"
-          mkdir -p "$INSTALL_DIR" "$SRC/vendor"
-          git -c "http.https://github.com/.extraheader=AUTHORIZATION: bearer ${GH_TOKEN}" \
-            clone --depth 1 https://github.com/gitkb/gitkb-core.git "$SRC/gitkb-core"
-          git -c "http.https://github.com/.extraheader=AUTHORIZATION: bearer ${GH_TOKEN}" \
-            clone --depth 1 https://github.com/gitkb/tree-sitter-markdown.git "$SRC/vendor/tree-sitter-markdown"
-          cargo install --path "$SRC/gitkb-core/crates/gitkb-cli" --root "$INSTALL_DIR"
-          rm -rf "$SRC"
-          echo "$INSTALL_DIR/bin" >> "$GITHUB_PATH"
+          mkdir -p "$INSTALL_DIR"
+          cd "$RUNNER_TEMP"
+          gh release download -R gitkb/gitkb-releases -p 'gitkb-linux-x64.tar.gz*'
+          sha256sum -c gitkb-linux-x64.tar.gz.sha256
+          tar -xzf gitkb-linux-x64.tar.gz -C "$INSTALL_DIR"
+          echo "$INSTALL_DIR" >> "$GITHUB_PATH"
 
       - name: Install test deps
         run: sudo apt-get update && sudo apt-get install -y bats parallel
