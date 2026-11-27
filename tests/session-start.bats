@@ -22,7 +22,8 @@ teardown() {
   ctx=$(echo "$output" | jq -r '.hookSpecificOutput.additionalContext')
   [[ "$ctx" == *"GitKB Ready"* ]]
   [[ "$ctx" == *"git-kb init claude"* ]]
-  [[ "$ctx" == *"git-kb doctor --check repos,code,kb --json"* ]]
+  [[ "$ctx" == *"git-kb doctor --check repos,kb --json"* ]]
+  [[ "$ctx" == *"git-kb code doctor --json"* ]]
   [[ "$ctx" != *"tasks/test-1"* ]]
 
   local wp
