@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/gitkb/gitkb-claude-plugin/compare/v0.2.0...v0.2.1) (2026-11-27)
+
+
+### Bug Fixes
+
+* **hooks:** split git-kb doctor and git-kb code doctor in SessionStart guidance ([#16](https://github.com/gitkb/gitkb-claude-plugin/issues/16)) ([96b3c24](https://github.com/gitkb/gitkb-claude-plugin/commit/96b3c246af06241ef60df86e036a026a4fc266fa))
+
 ## [0.2.0](https://github.com/gitkb/gitkb-claude-plugin/compare/v0.1.0...v0.2.0) (2026-05-19)
 
 
